@@ -24,12 +24,14 @@ DesktopLauncherは、アプリケーション、ファイル、フォルダ、UR
 | 検索機能 | インクリメンタルサーチでアイテムを絞り込み |
 | ドラッグ&ドロップ | ファイル/URLのドロップで簡単登録 |
 | グローバルホットキー | どの画面からでもランチャーを呼び出し |
+| トースト通知 | 操作完了時に右下に通知表示 |
 
 ### アイテム操作
 
 | 操作 | 方法 |
 |------|------|
 | 追加 | ドラッグ&ドロップ / 右クリックメニュー |
+| URL追加 | 右クリック → URL追加（直接入力） |
 | 編集 | アイテムを右クリック → 編集 |
 | 削除 | アイテムを右クリック → 削除 |
 | 移動 | タイルをドラッグして並べ替え |
@@ -74,9 +76,13 @@ Blue / Pink / Green / Red / Purple / Orange / Passion / Cutie / Mint / Sunset
 | Medium | 8列 × 5行 | 40 |
 | Large | 6列 × 4行 | 24 |
 
+タイルサイズに応じてアイコンとテキストのサイズも自動調整されます。
+
 #### ウィンドウ透明度
 
 0%（不透明）〜 70%（透明）の範囲で調整可能
+
+※設定画面・編集画面などのダイアログは常に不透明で表示
 
 ### 動作設定
 
@@ -103,7 +109,7 @@ Blue / Pink / Green / Red / Purple / Orange / Passion / Cutie / Mint / Sunset
 | Application | 実行ファイル（.exe） | ファイルから自動取得 |
 | File | 各種ファイル | 関連付けアプリから取得 |
 | Folder | フォルダ | システムフォルダアイコン |
-| URL | Webサイト | 地球アイコン |
+| URL | Webサイト | サイトのファビコンを自動取得 |
 
 ## アイテムの詳細設定
 
@@ -115,6 +121,37 @@ Blue / Pink / Green / Red / Purple / Orange / Passion / Cutie / Mint / Sunset
 | 作業ディレクトリ | 実行時のカレントディレクトリ |
 | カスタムアイコン | 任意のアイコン画像（.ico, .png, .jpg） |
 
+## コマンド登録例
+
+コマンドプロンプトやPowerShellのコマンドも登録できます。
+
+### コマンドプロンプト
+
+| 用途 | パス | 引数 |
+|------|------|------|
+| ping実行 | `cmd.exe` | `/k ping google.com` |
+| ipconfig確認 | `cmd.exe` | `/k ipconfig /all` |
+| CPU使用率監視 | `cmd.exe` | `/k typeperf "\Processor(_Total)\% Processor Time"` |
+| 特定フォルダで開く | `cmd.exe` | `/k cd /d C:\Projects` |
+
+※ `/k` はコマンド実行後ウィンドウを開いたまま、`/c` は閉じる
+
+### PowerShell
+
+| 用途 | パス | 引数 |
+|------|------|------|
+| コマンド実行 | `powershell.exe` | `-NoExit -Command "Get-Process"` |
+| 上位プロセス表示 | `powershell.exe` | `-NoExit -Command "Get-Process \| Sort CPU -Desc \| Select -First 10"` |
+
+### システムツール
+
+| 用途 | パス |
+|------|------|
+| タスクマネージャー | `taskmgr.exe` |
+| リソースモニター | `resmon.exe` |
+| パフォーマンスモニター | `perfmon.exe` |
+| システム情報 | `msinfo32.exe` |
+
 ## データ保存
 
 ### 保存場所
@@ -122,6 +159,14 @@ Blue / Pink / Green / Red / Purple / Orange / Passion / Cutie / Mint / Sunset
 ```
 %LOCALAPPDATA%\DesktopLauncher\launcher_data.json
 ```
+
+### ファビコンキャッシュ
+
+```
+%LOCALAPPDATA%\DesktopLauncher\Icons\
+```
+
+URL登録時に取得したファビコンはこのフォルダにキャッシュされます。
 
 ### 保存内容
 
