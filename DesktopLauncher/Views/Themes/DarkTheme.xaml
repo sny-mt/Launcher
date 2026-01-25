@@ -5,6 +5,10 @@
     <Color x:Key="PrimaryColor">#E01E1E1E</Color>
     <Color x:Key="SecondaryColor">#D0252526</Color>
     <Color x:Key="TertiaryColor">#C02D2D30</Color>
+
+    <!-- ダイアログ用（不透明） -->
+    <Color x:Key="DialogPrimaryColor">#FF1E1E1E</Color>
+    <Color x:Key="DialogSecondaryColor">#FF252526</Color>
     <Color x:Key="AccentColor">#FF007ACC</Color>
     <Color x:Key="AccentHoverColor">#FF1C97EA</Color>
     <Color x:Key="TextColor">#FFFFFFFF</Color>
@@ -17,6 +21,10 @@
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource TertiaryColor}"/>
+
+    <!-- ダイアログ用ブラシ（不透明） -->
+    <SolidColorBrush x:Key="DialogPrimaryBrush" Color="{StaticResource DialogPrimaryColor}"/>
+    <SolidColorBrush x:Key="DialogSecondaryBrush" Color="{StaticResource DialogSecondaryColor}"/>
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}"/>
     <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>

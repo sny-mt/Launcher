@@ -1,18 +1,14 @@
-<Window x:Class="DesktopLauncher.Views.CategoryEditWindow"
+<Window x:Class="DesktopLauncher.Views.InputDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        Title="カテゴリ"
-        Width="350" Height="220"
+        Title="入力"
+        Width="400" Height="220"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        PreviewKeyDown="Window_PreviewKeyDown"
-        Loaded="Window_Loaded">
+        PreviewKeyDown="Window_PreviewKeyDown">
 
     <Border Background="{DynamicResource DialogPrimaryBrush}"
             BorderBrush="{DynamicResource BorderBrush}"
@@ -33,7 +29,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock x:Name="TitleText"
-                           Text="カテゴリを追加"
+                           Text="入力"
                            Foreground="{DynamicResource TextBrush}"
                            FontSize="14"
                            FontWeight="SemiBold"
@@ -42,31 +38,22 @@
                 <Button Grid.Column="1"
                         Style="{StaticResource IconButtonStyle}"
                         Click="CloseButton_Click"
-                        Margin="8" Cursor="Hand">
+                        Margin="8">
                     <TextBlock Text="✕" FontSize="12"/>
                 </Button>
             </Grid>
 
-            <!-- 入力エリア -->
-            <Grid Grid.Row="1" Margin="16">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0"
-                           Text="カテゴリ名"
+            <!-- 入力内容 -->
+            <StackPanel Grid.Row="1" Margin="16">
+                <TextBlock x:Name="PromptText"
+                           Text="URLを入力してください"
                            Foreground="{DynamicResource TextBrush}"
-                           FontSize="13"
                            Margin="0,0,0,8"/>
-
-                <TextBox x:Name="CategoryNameTextBox"
-                         Grid.Row="1"
+                <TextBox x:Name="InputTextBox"
                          Style="{StaticResource SearchTextBoxStyle}"
-                         Tag="カテゴリ名を入力..."
-                         VerticalContentAlignment="Center"
-                         Text="{Binding CategoryName, UpdateSourceTrigger=PropertyChanged}"/>
-            </Grid>
+                         Text=""
+                         KeyDown="InputTextBox_KeyDown"/>
+            </StackPanel>
 
             <!-- ボタン -->
             <StackPanel Grid.Row="2"
@@ -80,8 +67,8 @@
                         Background="{DynamicResource TertiaryBrush}"
                         Foreground="{DynamicResource TextBrush}"
                         BorderThickness="0"/>
-                <Button Content="保存"
-                        Click="SaveButton_Click"
+                <Button Content="OK"
+                        Click="OkButton_Click"
                         Padding="24,8"
                         Background="{DynamicResource AccentBrush}"
                         Foreground="White"

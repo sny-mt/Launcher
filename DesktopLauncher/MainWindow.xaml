@@ -168,6 +168,8 @@
                 <Grid.ContextMenu>
                     <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                         <MenuItem Header="追加" Command="{Binding AddItemCommand}"/>
+                        <MenuItem Header="URL追加" Command="{Binding AddUrlCommand}"/>
+                        <Separator/>
                         <MenuItem Header="整列" Command="{Binding ArrangeItemsCommand}"/>
                     </ContextMenu>
                 </Grid.ContextMenu>
@@ -243,16 +245,18 @@
                                     </Button.ContextMenu>
                                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4">
                                         <Image Source="{Binding Item.Icon}"
-                                               Width="32" Height="32"
+                                               Width="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Icon}"
+                                               Height="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Icon}"
                                                HorizontalAlignment="Center"
                                                RenderOptions.BitmapScalingMode="HighQuality"/>
                                         <TextBlock Text="{Binding Item.Name}"
                                                    Foreground="{DynamicResource TextBrush}"
-                                                   FontSize="10"
+                                                   FontSize="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Font}"
                                                    TextAlignment="Center"
                                                    TextWrapping="Wrap"
-                                                   MaxHeight="28"
-                                                   Margin="0,2,0,0"/>
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxHeight="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=TextHeight}"
+                                                   Margin="0,4,0,0"/>
                                     </StackPanel>
                                 </Button>
                             </Border>
@@ -274,7 +278,8 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Style="{StaticResource TileButtonStyle}"
-                                        Width="80" Height="80"
+                                        Width="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}}"
+                                        Height="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}}"
                                         Margin="4"
                                         Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
                                         Command="{Binding DataContext.LaunchItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -295,7 +300,8 @@
                                     </Button.ContextMenu>
                                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4">
                                         <Image Source="{Binding Icon}"
-                                               Width="32" Height="32"
+                                               Width="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Icon}"
+                                               Height="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Icon}"
                                                HorizontalAlignment="Center"
                                                RenderOptions.BitmapScalingMode="HighQuality"/>
                                         <controls:HighlightTextBlock
@@ -304,10 +310,11 @@
                                                    HighlightBrush="{DynamicResource AccentBrush}"
                                                    HighlightForeground="White"
                                                    Foreground="{DynamicResource TextBrush}"
-                                                   FontSize="10"
+                                                   FontSize="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Font}"
                                                    TextAlignment="Center"
                                                    TextWrapping="Wrap"
-                                                   MaxHeight="28"
+                                                   MaxWidth="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Text}"
+                                                   MaxHeight="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=TextHeight}"
                                                    Margin="0,2,0,0"/>
                                     </StackPanel>
                                 </Button>

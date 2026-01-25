@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Interop;
 using Microsoft.Win32;
 using DesktopLauncher.Interfaces.Services;
+using DesktopLauncher.Views;
 using System.Windows.Forms;
 using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
@@ -154,6 +155,19 @@ namespace DesktopLauncher.Services
         public void ShowError(string message, string title = "エラー")
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        public string? ShowInputDialog(string prompt, string title = "入力", string defaultValue = "")
+        {
+            return ShowDialogWithTopmost(() =>
+            {
+                var dialog = new InputDialog(prompt, title, defaultValue)
+                {
+                    Owner = MainWindow
+                };
+
+                return dialog.ShowDialog() == true ? dialog.InputText : null;
+            });
         }
     }
 }

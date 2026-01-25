@@ -52,5 +52,14 @@ namespace DesktopLauncher.Interfaces.Services
         /// <param name="message">メッセージ</param>
         /// <param name="title">タイトル</param>
         void ShowError(string message, string title = "エラー");
+
+        /// <summary>
+        /// テキスト入力ダイアログを表示する
+        /// </summary>
+        /// <param name="prompt">プロンプトメッセージ</param>
+        /// <param name="title">タイトル</param>
+        /// <param name="defaultValue">デフォルト値</param>
+        /// <returns>入力されたテキスト（キャンセル時はnull）</returns>
+        string? ShowInputDialog(string prompt, string title = "入力", string defaultValue = "");
     }
 }

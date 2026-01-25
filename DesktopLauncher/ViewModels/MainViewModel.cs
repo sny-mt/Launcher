@@ -302,6 +302,27 @@ namespace DesktopLauncher.ViewModels
             AddItemFromPath(path!);
         }
 
+        [RelayCommand]
+        private void AddUrl()
+        {
+            if (SelectedCategory == null)
+            {
+                _dialogService.ShowError("カテゴリを選択してください。");
+                return;
+            }
+
+            var url = _dialogService.ShowInputDialog("URLを入力してください", "URL追加", "https://");
+            if (string.IsNullOrWhiteSpace(url)) return;
+
+            // URLの簡易バリデーション
+            if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+            {
+                url = "https://" + url;
+            }
+
+            AddItemFromPath(url);
+        }
+
         public void AddItemFromPath(string path)
         {
             if (SelectedCategory == null) return;

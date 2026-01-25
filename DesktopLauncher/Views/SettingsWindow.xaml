@@ -14,7 +14,7 @@
         WindowStartupLocation="CenterOwner"
         PreviewKeyDown="Window_PreviewKeyDown">
 
-    <Border Background="{DynamicResource PrimaryBrush}"
+    <Border Background="{DynamicResource DialogPrimaryBrush}"
             BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1"
             CornerRadius="8">
