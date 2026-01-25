@@ -60,6 +60,9 @@ namespace DesktopLauncher.ViewModels
         [ObservableProperty]
         private bool _isWindowVisible = true;
 
+        [ObservableProperty]
+        private ObservableCollection<ToastViewModel> _toasts = new();
+
         public event EventHandler? RequestHideWindow;
         public event EventHandler? RequestDeactivate;
 
@@ -332,6 +335,7 @@ namespace DesktopLauncher.ViewModels
             {
                 _itemOperationsService.AutoPositionNewItems(SelectedCategory, TotalSlots);
                 FilterItems();
+                ShowToast($"'{itemVm.Name}' を追加しました");
             }
         }
 
@@ -340,13 +344,15 @@ namespace DesktopLauncher.ViewModels
         {
             if (item == null || SelectedCategory == null) return;
 
-            if (!_dialogService.ShowConfirmDialog($"'{item.Name}' を削除しますか？"))
+            var itemName = item.Name;
+            if (!_dialogService.ShowConfirmDialog($"'{itemName}' を削除しますか？"))
             {
                 return;
             }
 
             _itemOperationsService.DeleteItem(item, SelectedCategory);
             FilterItems();
+            ShowToast($"'{itemName}' を削除しました");
         }
 
         public void MoveItemToSlot(LauncherItemViewModel item, int targetSlot)
@@ -419,6 +425,7 @@ namespace DesktopLauncher.ViewModels
                 var categoryVm = new CategoryViewModel(category);
                 Categories.Add(categoryVm);
                 SelectedCategory = categoryVm;
+                ShowToast($"カテゴリ '{category.Name}' を追加しました");
             }
         }
 
@@ -437,6 +444,7 @@ namespace DesktopLauncher.ViewModels
                 _categoryRepository.Save();
 
                 categoryVm.UpdateModel(updatedCategory);
+                ShowToast($"カテゴリ '{updatedCategory.Name}' を更新しました");
             }
         }
 
@@ -445,7 +453,8 @@ namespace DesktopLauncher.ViewModels
         {
             if (category == null) return;
 
-            if (!_dialogService.ShowConfirmDialog($"カテゴリ '{category.Name}' を削除しますか？\n含まれるアイテムも削除されます。"))
+            var categoryName = category.Name;
+            if (!_dialogService.ShowConfirmDialog($"カテゴリ '{categoryName}' を削除しますか？\n含まれるアイテムも削除されます。"))
             {
                 return;
             }
@@ -457,6 +466,7 @@ namespace DesktopLauncher.ViewModels
             {
                 SelectedCategory = Categories.FirstOrDefault();
             }
+            ShowToast($"カテゴリ '{categoryName}' を削除しました");
         }
 
         [RelayCommand]
@@ -470,6 +480,7 @@ namespace DesktopLauncher.ViewModels
                 Settings = settingsWindow.ResultSettings;
                 RefreshGridSlots();
                 SettingsChanged?.Invoke(this, Settings);
+                ShowToast("設定を保存しました");
             }
         }
 
@@ -491,6 +502,7 @@ namespace DesktopLauncher.ViewModels
 
                 item.UpdateModel(resultItem);
                 FilterItems();
+                ShowToast($"'{item.Name}' を更新しました");
             }
         }
 
@@ -552,5 +564,21 @@ namespace DesktopLauncher.ViewModels
         /// 設定が変更されたときに発火するイベント
         /// </summary>
         public event EventHandler<AppSettings>? SettingsChanged;
+
+        /// <summary>
+        /// トースト通知を表示する
+        /// </summary>
+        public void ShowToast(string message, ToastType type = ToastType.Success)
+        {
+            var toast = new ToastViewModel(message, type);
+            toast.CloseRequested += (s, e) =>
+            {
+                if (s is ToastViewModel t)
+                {
+                    Toasts.Remove(t);
+                }
+            };
+            Toasts.Add(toast);
+        }
     }
 }

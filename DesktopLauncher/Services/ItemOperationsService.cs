@@ -43,6 +43,16 @@ namespace DesktopLauncher.Services
                 CategoryId = category.Id
             };
 
+            // URLの場合はファビコンを取得
+            if (_itemTypeDetectionService.IsUrl(path))
+            {
+                var faviconPath = _iconService.DownloadFavicon(path);
+                if (!string.IsNullOrEmpty(faviconPath))
+                {
+                    item.CustomIconPath = faviconPath;
+                }
+            }
+
             _itemRepository.Add(item);
             _itemRepository.Save();
 
@@ -84,6 +94,16 @@ namespace DesktopLauncher.Services
                 CategoryId = category.Id,
                 GridPosition = targetSlot
             };
+
+            // URLの場合はファビコンを取得
+            if (_itemTypeDetectionService.IsUrl(path))
+            {
+                var faviconPath = _iconService.DownloadFavicon(path);
+                if (!string.IsNullOrEmpty(faviconPath))
+                {
+                    item.CustomIconPath = faviconPath;
+                }
+            }
 
             _itemRepository.Add(item);
             _itemRepository.Save();

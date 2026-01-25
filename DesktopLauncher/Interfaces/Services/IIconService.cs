@@ -26,5 +26,12 @@ namespace DesktopLauncher.Interfaces.Services
         /// </summary>
         /// <returns>デフォルトアイコン画像</returns>
         ImageSource GetDefaultIcon();
+
+        /// <summary>
+        /// URLからファビコンを取得してローカルに保存する
+        /// </summary>
+        /// <param name="url">WebサイトのURL</param>
+        /// <returns>保存したアイコンのパス（失敗時はnull）</returns>
+        string? DownloadFavicon(string url);
     }
 }

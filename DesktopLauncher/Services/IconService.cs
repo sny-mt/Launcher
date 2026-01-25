@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -181,6 +182,63 @@ namespace DesktopLauncher.Services
             if (string.IsNullOrEmpty(path)) return false;
             return path.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                    path.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public string? DownloadFavicon(string url)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(url) || !IsUrl(url))
+                {
+                    return null;
+                }
+
+                // URLからドメインを抽出
+                var uri = new Uri(url);
+                var domain = uri.Host;
+
+                // アイコン保存先ディレクトリを作成
+                var appDataPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "DesktopLauncher",
+                    "Icons");
+                Directory.CreateDirectory(appDataPath);
+
+                // ファイル名を生成（ドメイン名ベース）
+                var safeFileName = string.Join("_", domain.Split(Path.GetInvalidFileNameChars()));
+                var iconPath = Path.Combine(appDataPath, $"{safeFileName}.png");
+
+                // 既にダウンロード済みの場合はそのパスを返す
+                if (File.Exists(iconPath))
+                {
+                    return iconPath;
+                }
+
+                // Google Favicon APIを使用してファビコンを取得
+                var faviconUrl = $"https://www.google.com/s2/favicons?domain={domain}&sz=64";
+
+                using var httpClient = new HttpClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(10);
+
+                var response = httpClient.GetAsync(faviconUrl).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var iconData = response.Content.ReadAsByteArrayAsync().Result;
+
+                    // 取得したアイコンが有効かチェック（最小サイズ）
+                    if (iconData.Length > 100)
+                    {
+                        File.WriteAllBytes(iconPath, iconData);
+                        return iconPath;
+                    }
+                }
+            }
+            catch
+            {
+                // ダウンロード失敗時はnullを返す
+            }
+
+            return null;
         }
     }
 }

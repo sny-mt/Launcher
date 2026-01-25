@@ -324,6 +324,85 @@
                 </ScrollViewer>
             </Grid>
 
+            <!-- トースト通知 -->
+            <ItemsControl Grid.Row="2"
+                          ItemsSource="{Binding Toasts}"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Bottom"
+                          Margin="0,0,16,16">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{DynamicResource DialogSecondaryBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="12,10"
+                                Margin="0,4,0,0"
+                                MinWidth="200"
+                                MaxWidth="300">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Opacity" Value="1"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsClosing}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                         To="0" Duration="0:0:0.3"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding IconText}"
+                                           FontSize="14"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Type}" Value="Success">
+                                                    <Setter Property="Foreground" Value="#FF4CAF50"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Type}" Value="Error">
+                                                    <Setter Property="Foreground" Value="#FFE85959"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Type}" Value="Warning">
+                                                    <Setter Property="Foreground" Value="#FFFFC107"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Message}"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
         </Grid>
     </Border>
 </Window>
