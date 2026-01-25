@@ -2,6 +2,25 @@
 
 Windows用のデスクトップランチャーアプリケーション
 
+## スクリーンショット
+
+### メイン画面
+![メイン画面](docs/screenshots/main.png)
+
+### ダークテーマ / ライトテーマ
+| ダーク | ライト |
+|--------|--------|
+| ![Dark](docs/screenshots/theme-dark.png) | ![Light](docs/screenshots/theme-light.png) |
+
+### 検索機能
+![検索](docs/screenshots/search.png)
+
+### 設定画面
+![設定](docs/screenshots/settings.png)
+
+### トースト通知
+![トースト](docs/screenshots/toast.png)
+
 ## 概要
 
 DesktopLauncherは、アプリケーション、ファイル、フォルダ、URLをグリッド形式で管理・起動できるランチャーアプリです。グローバルホットキーで素早く呼び出し、検索機能で目的のアイテムに即座にアクセスできます。
