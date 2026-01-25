@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ライトテーマカラー（半透明） -->
+    <Color x:Key="PrimaryColor">#E0FFFFFF</Color>
+    <Color x:Key="SecondaryColor">#D0F3F3F3</Color>
+    <Color x:Key="TertiaryColor">#C0E5E5E5</Color>
+    <Color x:Key="AccentColor">#FF0078D4</Color>
+    <Color x:Key="AccentHoverColor">#FF106EBE</Color>
+    <Color x:Key="TextColor">#FF1E1E1E</Color>
+    <Color x:Key="TextSecondaryColor">#CC666666</Color>
+    <Color x:Key="BorderColor">#80CCCCCC</Color>
+    <Color x:Key="HoverColor">#60E8E8E8</Color>
+    <Color x:Key="SelectedColor">#80CCE4F7</Color>
+
+    <!-- ブラシ -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource TertiaryColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}"/>
+    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}"/>
+    <SolidColorBrush x:Key="SelectedBrush" Color="{StaticResource SelectedColor}"/>
+
+</ResourceDictionary>
