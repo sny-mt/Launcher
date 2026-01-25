@@ -63,6 +63,18 @@ namespace DesktopLauncher.ViewModels
         [ObservableProperty]
         private ObservableCollection<ToastViewModel> _toasts = new();
 
+        [ObservableProperty]
+        private int _selectedSlotIndex = -1;
+
+        partial void OnSelectedSlotIndexChanged(int value)
+        {
+            // グリッドスロットの選択状態を更新
+            for (int i = 0; i < GridSlots.Count; i++)
+            {
+                GridSlots[i].IsSelected = (i == value);
+            }
+        }
+
         public event EventHandler? RequestHideWindow;
         public event EventHandler? RequestDeactivate;
 
@@ -579,6 +591,133 @@ namespace DesktopLauncher.ViewModels
                 }
             };
             Toasts.Add(toast);
+        }
+
+        /// <summary>
+        /// 次のカテゴリに切り替える
+        /// </summary>
+        public void SelectNextCategory()
+        {
+            if (Categories.Count == 0) return;
+
+            var currentIndex = SelectedCategory != null ? Categories.IndexOf(SelectedCategory) : -1;
+            var nextIndex = (currentIndex + 1) % Categories.Count;
+            SelectedCategory = Categories[nextIndex];
+            SelectedSlotIndex = -1;
+        }
+
+        /// <summary>
+        /// 前のカテゴリに切り替える
+        /// </summary>
+        public void SelectPreviousCategory()
+        {
+            if (Categories.Count == 0) return;
+
+            var currentIndex = SelectedCategory != null ? Categories.IndexOf(SelectedCategory) : 0;
+            var prevIndex = (currentIndex - 1 + Categories.Count) % Categories.Count;
+            SelectedCategory = Categories[prevIndex];
+            SelectedSlotIndex = -1;
+        }
+
+        /// <summary>
+        /// 矢印キーでスロットを移動する
+        /// </summary>
+        public void NavigateSlot(int deltaX, int deltaY)
+        {
+            if (SelectedCategory == null) return;
+
+            // 検索中は検索結果内を移動
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                NavigateSearchResults(deltaX, deltaY);
+                return;
+            }
+
+            // 初期選択
+            if (SelectedSlotIndex < 0)
+            {
+                // 最初のアイテムがあるスロットを選択
+                var firstItem = SelectedCategory.Items.OrderBy(i => i.GridPosition).FirstOrDefault(i => i.GridPosition >= 0);
+                SelectedSlotIndex = firstItem?.GridPosition ?? 0;
+                return;
+            }
+
+            // 現在の行と列を計算
+            var currentRow = SelectedSlotIndex / GridColumns;
+            var currentCol = SelectedSlotIndex % GridColumns;
+
+            // 新しい位置を計算
+            var newCol = Math.Max(0, Math.Min(GridColumns - 1, currentCol + deltaX));
+            var newRow = Math.Max(0, Math.Min(GridRows - 1, currentRow + deltaY));
+            var newIndex = newRow * GridColumns + newCol;
+
+            if (newIndex >= 0 && newIndex < TotalSlots)
+            {
+                SelectedSlotIndex = newIndex;
+            }
+        }
+
+        private void NavigateSearchResults(int deltaX, int deltaY)
+        {
+            if (DisplayedItems.Count == 0) return;
+
+            var currentIndex = SelectedSlotIndex;
+            if (currentIndex < 0) currentIndex = 0;
+
+            // 横方向の移動
+            var newIndex = currentIndex + deltaX;
+
+            // 縦方向は行単位で移動（仮に1行4個と仮定）
+            var itemsPerRow = Math.Max(1, (int)(700 / 80)); // ウィンドウ幅 / タイルサイズ概算
+            newIndex += deltaY * itemsPerRow;
+
+            newIndex = Math.Max(0, Math.Min(DisplayedItems.Count - 1, newIndex));
+            SelectedSlotIndex = newIndex;
+        }
+
+        /// <summary>
+        /// 選択中のアイテムを取得する
+        /// </summary>
+        public LauncherItemViewModel? GetSelectedItem()
+        {
+            if (SelectedSlotIndex < 0) return null;
+
+            // 検索中は検索結果から取得
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                if (SelectedSlotIndex < DisplayedItems.Count)
+                {
+                    return DisplayedItems[SelectedSlotIndex];
+                }
+                return null;
+            }
+
+            // 通常表示はグリッドスロットから取得
+            if (SelectedSlotIndex < GridSlots.Count)
+            {
+                return GridSlots[SelectedSlotIndex].Item;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 選択中のアイテムを起動する
+        /// </summary>
+        public void LaunchSelectedItem()
+        {
+            var item = GetSelectedItem();
+            if (item != null)
+            {
+                LaunchItemCommand.Execute(item);
+            }
+        }
+
+        /// <summary>
+        /// 選択をリセットする
+        /// </summary>
+        public void ResetSelection()
+        {
+            SelectedSlotIndex = -1;
         }
     }
 }

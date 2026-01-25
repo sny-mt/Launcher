@@ -187,8 +187,6 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Background="{DynamicResource TertiaryBrush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1"
                                     CornerRadius="4"
                                     Margin="2"
                                     AllowDrop="True"
@@ -196,6 +194,18 @@
                                     DragOver="GridSlot_DragOver"
                                     DragLeave="GridSlot_DragLeave"
                                     Tag="{Binding SlotIndex}">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                <Setter Property="BorderThickness" Value="2"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <!-- アイテムがある場合 -->
                                 <Button Style="{StaticResource TileButtonStyle}"
                                         Visibility="{Binding HasItem, Converter={StaticResource BoolToVisibilityConverter}}"

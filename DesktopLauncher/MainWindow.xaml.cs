@@ -140,17 +140,63 @@ namespace DesktopLauncher
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            // 検索ボックスに文字がある場合は左右キーをテキスト編集用に使用
+            var hasSearchText = !string.IsNullOrEmpty(_viewModel.SearchText);
+
             if (e.Key == Key.Escape)
             {
                 HideWindow();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Enter && _viewModel.DisplayedItems.Any())
+            else if (e.Key == Key.Tab)
             {
-                // 最初のアイテムを起動
-                var firstItem = _viewModel.DisplayedItems.First();
-                _viewModel.LaunchItemCommand.Execute(firstItem);
+                // Tab: 次のカテゴリ、Shift+Tab: 前のカテゴリ
+                if (Keyboard.Modifiers == ModifierKeys.Shift)
+                {
+                    _viewModel.SelectPreviousCategory();
+                }
+                else
+                {
+                    _viewModel.SelectNextCategory();
+                }
                 e.Handled = true;
+            }
+            else if (e.Key == Key.Left && !hasSearchText)
+            {
+                _viewModel.NavigateSlot(-1, 0);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Right && !hasSearchText)
+            {
+                _viewModel.NavigateSlot(1, 0);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Up)
+            {
+                _viewModel.NavigateSlot(0, -1);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Down)
+            {
+                _viewModel.NavigateSlot(0, 1);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Enter)
+            {
+                // 選択中のアイテムを起動
+                var selectedItem = _viewModel.GetSelectedItem();
+                if (selectedItem != null)
+                {
+                    _viewModel.LaunchItemCommand.Execute(selectedItem);
+                    e.Handled = true;
+                }
+                else if (_viewModel.DisplayedItems.Any())
+                {
+                    // 選択がなければ最初のアイテムを起動
+                    var firstItem = _viewModel.DisplayedItems.First();
+                    _viewModel.LaunchItemCommand.Execute(firstItem);
+                    e.Handled = true;
+                }
             }
         }
 

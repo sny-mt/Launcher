@@ -14,6 +14,9 @@ namespace DesktopLauncher.ViewModels
         [ObservableProperty]
         private LauncherItemViewModel? _item;
 
+        [ObservableProperty]
+        private bool _isSelected;
+
         public bool HasItem => Item != null;
 
         partial void OnItemChanged(LauncherItemViewModel? value)
