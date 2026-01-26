@@ -162,6 +162,7 @@
                 </StackPanel>
             </ScrollViewer>
 
+
             <!-- アイテムグリッド -->
             <Grid Grid.Row="2" Margin="16,0,16,16" Background="Transparent"
                   Tag="{Binding}">
@@ -174,10 +175,10 @@
                     </ContextMenu>
                 </Grid.ContextMenu>
 
-                <!-- グリッドスロット表示（検索していない時） -->
+                <!-- グリッドスロット表示（タイルビュー・検索していない時） -->
                 <ItemsControl x:Name="GridSlotsControl"
                               ItemsSource="{Binding GridSlots}"
-                              Visibility="{Binding SearchText, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=Invert}">
+                              Visibility="{Binding ShowTileView, Converter={StaticResource BoolToVisibilityConverter}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="{Binding DataContext.GridColumns, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -253,21 +254,30 @@
                                                       CommandParameter="{Binding PlacementTarget.DataContext.Item, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                         </ContextMenu>
                                     </Button.ContextMenu>
-                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4">
-                                        <Image Source="{Binding Item.Icon}"
-                                               Width="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Icon}"
-                                               Height="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Icon}"
+                                    <Grid Margin="2">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Image Grid.Row="0"
+                                               Source="{Binding Item.Icon}"
+                                               Width="{Binding DataContext.Settings.IconSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               Height="{Binding DataContext.Settings.IconSize, RelativeSource={RelativeSource AncestorType=Window}}"
                                                HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
                                                RenderOptions.BitmapScalingMode="HighQuality"/>
-                                        <TextBlock Text="{Binding Item.Name}"
+                                        <TextBlock Grid.Row="1"
+                                                   Text="{Binding Item.Name}"
                                                    Foreground="{DynamicResource TextBrush}"
-                                                   FontSize="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Font}"
+                                                   FontSize="{Binding DataContext.Settings.FontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                   FontFamily="{Binding DataContext.Settings.FontFamily, RelativeSource={RelativeSource AncestorType=Window}}"
                                                    TextAlignment="Center"
                                                    TextWrapping="Wrap"
                                                    TextTrimming="CharacterEllipsis"
-                                                   MaxHeight="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=TextHeight}"
+                                                   VerticalAlignment="Top"
+                                                   HorizontalAlignment="Center"
                                                    Margin="0,4,0,0"/>
-                                    </StackPanel>
+                                    </Grid>
                                 </Button>
                             </Border>
                         </DataTemplate>
@@ -275,63 +285,95 @@
                 </ItemsControl>
 
                 <!-- 検索結果表示（検索している時） -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
-                              Visibility="{Binding SearchText, Converter={StaticResource StringToVisibilityConverter}}">
-                    <ItemsControl ItemsSource="{Binding DisplayedItems}"
-                                  Background="Transparent">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
+                <ItemsControl ItemsSource="{Binding SearchGridSlots}"
+                              Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="{Binding DataContext.GridColumns, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       Rows="{Binding DataContext.GridRows, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{DynamicResource TertiaryBrush}"
+                                    CornerRadius="4"
+                                    Margin="2"
+                                    Tag="{Binding SlotIndex}">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                <Setter Property="BorderThickness" Value="2"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <Button Style="{StaticResource TileButtonStyle}"
-                                        Width="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}}"
-                                        Height="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}}"
-                                        Margin="4"
+                                        Visibility="{Binding HasItem, Converter={StaticResource BoolToVisibilityConverter}}"
                                         Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
                                         Command="{Binding DataContext.LaunchItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding}"
+                                        CommandParameter="{Binding Item}"
                                         ToolTipService.InitialShowDelay="500">
                                     <Button.ToolTip>
-                                        <TextBlock Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="300"/>
+                                        <ToolTip>
+                                            <ToolTip.Style>
+                                                <Style TargetType="ToolTip">
+                                                    <Setter Property="Background" Value="{DynamicResource SecondaryBrush}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                                    <Setter Property="BorderThickness" Value="1"/>
+                                                    <Setter Property="Padding" Value="8,6"/>
+                                                    <Setter Property="FontSize" Value="11"/>
+                                                </Style>
+                                            </ToolTip.Style>
+                                            <TextBlock Text="{Binding Item.Path}" TextWrapping="Wrap" MaxWidth="300"/>
+                                        </ToolTip>
                                     </Button.ToolTip>
                                     <Button.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="開く"
                                                       Command="{Binding PlacementTarget.Tag.LaunchItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                      CommandParameter="{Binding PlacementTarget.DataContext.Item, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                             <MenuItem Header="編集"
                                                       Command="{Binding PlacementTarget.Tag.EditItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                      CommandParameter="{Binding PlacementTarget.DataContext.Item, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                         </ContextMenu>
                                     </Button.ContextMenu>
-                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4">
-                                        <Image Source="{Binding Icon}"
-                                               Width="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Icon}"
-                                               Height="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Icon}"
+                                    <Grid Margin="2">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Image Grid.Row="0"
+                                               Source="{Binding Item.Icon}"
+                                               Width="{Binding DataContext.Settings.IconSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               Height="{Binding DataContext.Settings.IconSize, RelativeSource={RelativeSource AncestorType=Window}}"
                                                HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
                                                RenderOptions.BitmapScalingMode="HighQuality"/>
-                                        <controls:HighlightTextBlock
-                                                   SourceText="{Binding Name}"
+                                        <controls:HighlightTextBlock Grid.Row="1"
+                                                   SourceText="{Binding Item.Name}"
                                                    HighlightText="{Binding DataContext.SearchText, RelativeSource={RelativeSource AncestorType=Window}}"
                                                    HighlightBrush="{DynamicResource AccentBrush}"
                                                    HighlightForeground="White"
                                                    Foreground="{DynamicResource TextBrush}"
-                                                   FontSize="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Font}"
+                                                   FontSize="{Binding DataContext.Settings.FontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                   FontFamily="{Binding DataContext.Settings.FontFamily, RelativeSource={RelativeSource AncestorType=Window}}"
                                                    TextAlignment="Center"
                                                    TextWrapping="Wrap"
-                                                   MaxWidth="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=Text}"
-                                                   MaxHeight="{Binding DataContext.Settings.TileSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TileSizeToDoubleConverter}, ConverterParameter=TextHeight}"
-                                                   Margin="0,2,0,0"/>
-                                    </StackPanel>
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Top"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,4,0,0"/>
+                                    </Grid>
                                 </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Grid>
 
             <!-- トースト通知 -->

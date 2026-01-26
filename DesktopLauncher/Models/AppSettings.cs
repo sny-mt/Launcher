@@ -34,19 +34,24 @@ namespace DesktopLauncher.Models
         public double WindowOpacity { get; set; } = 0.1;
 
         /// <summary>
-        /// 表示モード（タイル/リスト）
-        /// </summary>
-        public ViewMode ViewMode { get; set; } = ViewMode.Tile;
-
-        /// <summary>
-        /// カテゴリ切替方式
-        /// </summary>
-        public CategoryDisplayMode CategoryDisplayMode { get; set; } = CategoryDisplayMode.TabTop;
-
-        /// <summary>
         /// タイルサイズ
         /// </summary>
         public TileSize TileSize { get; set; } = TileSize.Medium;
+
+        /// <summary>
+        /// フォントサイズ (8-16)
+        /// </summary>
+        public double FontSize { get; set; } = 11.0;
+
+        /// <summary>
+        /// フォント名
+        /// </summary>
+        public string FontFamily { get; set; } = "Yu Gothic UI";
+
+        /// <summary>
+        /// アイコンサイズ (24-64)
+        /// </summary>
+        public double IconSize { get; set; } = 32.0;
 
         /// <summary>
         /// Windows起動時に自動起動

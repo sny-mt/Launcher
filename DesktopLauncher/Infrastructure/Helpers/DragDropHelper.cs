@@ -135,8 +135,9 @@ namespace DesktopLauncher.Infrastructure.Helpers
             }
             else
             {
-                border.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
-                border.BorderThickness = new Thickness(1);
+                // ローカル値をクリアしてStyleトリガーが効くようにする
+                border.ClearValue(Border.BorderBrushProperty);
+                border.ClearValue(Border.BorderThicknessProperty);
             }
         }
 

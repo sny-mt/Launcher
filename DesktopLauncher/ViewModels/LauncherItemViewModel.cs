@@ -49,12 +49,22 @@ namespace DesktopLauncher.ViewModels
 
         public void LoadIcon()
         {
+            // 1. Base64アイコンがあれば使用
+            if (!string.IsNullOrEmpty(Model.IconBase64))
+            {
+                Icon = _iconService.LoadFromBase64(Model.IconBase64!);
+                if (Icon != null) return;
+            }
+
+            // 2. カスタムアイコンパスがあれば使用（後方互換）
             if (!string.IsNullOrEmpty(Model.CustomIconPath))
             {
                 Icon = _iconService.LoadCustomIcon(Model.CustomIconPath!);
+                if (Icon != null) return;
             }
 
-            Icon ??= _iconService.GetIconFromPath(Model.Path);
+            // 3. パスからアイコンを取得
+            Icon = _iconService.GetIconFromPath(Model.Path);
         }
 
         public void UpdateModel(LauncherItem model)

@@ -30,6 +30,9 @@ namespace DesktopLauncher.ViewModels
         private string? _customIconPath;
 
         [ObservableProperty]
+        private string? _iconBase64;
+
+        [ObservableProperty]
         private string? _arguments;
 
         [ObservableProperty]
@@ -69,6 +72,7 @@ namespace DesktopLauncher.ViewModels
             Path = item.Path;
             ItemType = item.ItemType;
             CustomIconPath = item.CustomIconPath;
+            IconBase64 = item.IconBase64;
             Arguments = item.Arguments;
             WorkingDirectory = item.WorkingDirectory;
         }
@@ -90,12 +94,22 @@ namespace DesktopLauncher.ViewModels
 
         private void UpdatePreviewIcon()
         {
+            // カスタムアイコンパスがあれば使用
             if (!string.IsNullOrEmpty(CustomIconPath))
             {
                 PreviewIcon = _iconService.LoadCustomIcon(CustomIconPath!);
+                if (PreviewIcon != null) return;
             }
 
-            PreviewIcon ??= _iconService.GetIconFromPath(Path);
+            // Base64アイコンがあれば使用
+            if (!string.IsNullOrEmpty(IconBase64))
+            {
+                PreviewIcon = _iconService.LoadFromBase64(IconBase64!);
+                if (PreviewIcon != null) return;
+            }
+
+            // パスからアイコンを取得
+            PreviewIcon = _iconService.GetIconFromPath(Path);
         }
 
         [RelayCommand]
@@ -167,6 +181,32 @@ namespace DesktopLauncher.ViewModels
 
         public LauncherItem GetResultItem()
         {
+            // アイコンをBase64に変換
+            string? iconBase64 = null;
+
+            // カスタムアイコンパスがあれば変換
+            if (!string.IsNullOrEmpty(CustomIconPath))
+            {
+                var customIcon = _iconService.LoadCustomIcon(CustomIconPath!);
+                if (customIcon != null)
+                {
+                    iconBase64 = _iconService.ConvertToBase64(customIcon);
+                }
+            }
+
+            // カスタムアイコンがない場合はパスから取得
+            if (string.IsNullOrEmpty(iconBase64))
+            {
+                if (Services.IconService.IsUrl(Path))
+                {
+                    iconBase64 = _iconService.DownloadFaviconAsBase64(Path);
+                }
+                else
+                {
+                    iconBase64 = _iconService.GetIconBase64FromPath(Path);
+                }
+            }
+
             return new LauncherItem
             {
                 Id = _originalItem.Id,
@@ -174,7 +214,8 @@ namespace DesktopLauncher.ViewModels
                 Path = Path,
                 ItemType = ItemType,
                 CategoryId = _originalItem.CategoryId,
-                CustomIconPath = CustomIconPath,
+                CustomIconPath = null, // パスは使わない
+                IconBase64 = iconBase64,
                 Arguments = Arguments,
                 WorkingDirectory = WorkingDirectory,
                 SortOrder = _originalItem.SortOrder,

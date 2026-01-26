@@ -43,14 +43,16 @@ namespace DesktopLauncher.Services
                 CategoryId = category.Id
             };
 
-            // URLの場合はファビコンを取得
+            // アイコンをBase64で保存
             if (_itemTypeDetectionService.IsUrl(path))
             {
-                var faviconPath = _iconService.DownloadFavicon(path);
-                if (!string.IsNullOrEmpty(faviconPath))
-                {
-                    item.CustomIconPath = faviconPath;
-                }
+                // URLの場合はファビコンを取得
+                item.IconBase64 = _iconService.DownloadFaviconAsBase64(path);
+            }
+            else
+            {
+                // ファイル/フォルダの場合はアイコンを取得
+                item.IconBase64 = _iconService.GetIconBase64FromPath(path);
             }
 
             _itemRepository.Add(item);
@@ -95,14 +97,16 @@ namespace DesktopLauncher.Services
                 GridPosition = targetSlot
             };
 
-            // URLの場合はファビコンを取得
+            // アイコンをBase64で保存
             if (_itemTypeDetectionService.IsUrl(path))
             {
-                var faviconPath = _iconService.DownloadFavicon(path);
-                if (!string.IsNullOrEmpty(faviconPath))
-                {
-                    item.CustomIconPath = faviconPath;
-                }
+                // URLの場合はファビコンを取得
+                item.IconBase64 = _iconService.DownloadFaviconAsBase64(path);
+            }
+            else
+            {
+                // ファイル/フォルダの場合はアイコンを取得
+                item.IconBase64 = _iconService.GetIconBase64FromPath(path);
             }
 
             _itemRepository.Add(item);

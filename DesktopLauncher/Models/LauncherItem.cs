@@ -34,9 +34,14 @@ namespace DesktopLauncher.Models
         public string CategoryId { get; set; } = string.Empty;
 
         /// <summary>
-        /// カスタムアイコンのパス（nullの場合は自動取得）
+        /// カスタムアイコンのパス（後方互換用、新規はIconBase64を使用）
         /// </summary>
         public string? CustomIconPath { get; set; }
+
+        /// <summary>
+        /// アイコンのBase64エンコード文字列（PNG形式）
+        /// </summary>
+        public string? IconBase64 { get; set; }
 
         /// <summary>
         /// 表示順序

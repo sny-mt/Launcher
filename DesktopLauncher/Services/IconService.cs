@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -16,6 +17,31 @@ namespace DesktopLauncher.Services
     public class IconService : IIconService
     {
         private ImageSource? _defaultIcon;
+
+        // Shell32 API定義
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+        private static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes,
+            ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private struct SHFILEINFO
+        {
+            public IntPtr hIcon;
+            public int iIcon;
+            public uint dwAttributes;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string szDisplayName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
+            public string szTypeName;
+        }
+
+        private const uint SHGFI_ICON = 0x100;
+        private const uint SHGFI_LARGEICON = 0x0;
+        private const uint SHGFI_USEFILEATTRIBUTES = 0x10;
+        private const uint FILE_ATTRIBUTE_NORMAL = 0x80;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool DestroyIcon(IntPtr hIcon);
 
         public ImageSource? GetIconFromPath(string path)
         {
@@ -43,14 +69,39 @@ namespace DesktopLauncher.Services
                     return GetFolderIcon();
                 }
 
-                // ファイルからアイコンを抽出
-                using var icon = Icon.ExtractAssociatedIcon(path);
-                if (icon != null)
+                // 方法1: Icon.ExtractAssociatedIconを試行
+                try
                 {
-                    return Imaging.CreateBitmapSourceFromHIcon(
-                        icon.Handle,
-                        Int32Rect.Empty,
-                        BitmapSizeOptions.FromEmptyOptions());
+                    using var icon = Icon.ExtractAssociatedIcon(path);
+                    if (icon != null)
+                    {
+                        return Imaging.CreateBitmapSourceFromHIcon(
+                            icon.Handle,
+                            Int32Rect.Empty,
+                            BitmapSizeOptions.FromEmptyOptions());
+                    }
+                }
+                catch
+                {
+                    // 失敗した場合は次の方法を試行
+                }
+
+                // 方法2: SHGetFileInfoを使用（より信頼性が高い）
+                var iconFromShell = GetIconFromShell(path);
+                if (iconFromShell != null)
+                {
+                    return iconFromShell;
+                }
+
+                // 方法3: 拡張子からアイコンを取得
+                var extension = System.IO.Path.GetExtension(path);
+                if (!string.IsNullOrEmpty(extension))
+                {
+                    var iconFromExtension = GetIconFromExtension(extension);
+                    if (iconFromExtension != null)
+                    {
+                        return iconFromExtension;
+                    }
                 }
             }
             catch
@@ -59,6 +110,59 @@ namespace DesktopLauncher.Services
             }
 
             return GetDefaultIcon();
+        }
+
+        private ImageSource? GetIconFromShell(string path)
+        {
+            var shfi = new SHFILEINFO();
+            var result = SHGetFileInfo(path, 0, ref shfi, (uint)Marshal.SizeOf(shfi), SHGFI_ICON | SHGFI_LARGEICON);
+
+            if (result != IntPtr.Zero && shfi.hIcon != IntPtr.Zero)
+            {
+                try
+                {
+                    using var icon = Icon.FromHandle(shfi.hIcon);
+                    var bitmapSource = Imaging.CreateBitmapSourceFromHIcon(
+                        icon.Handle,
+                        Int32Rect.Empty,
+                        BitmapSizeOptions.FromEmptyOptions());
+                    bitmapSource.Freeze();
+                    return bitmapSource;
+                }
+                finally
+                {
+                    DestroyIcon(shfi.hIcon);
+                }
+            }
+
+            return null;
+        }
+
+        private ImageSource? GetIconFromExtension(string extension)
+        {
+            var shfi = new SHFILEINFO();
+            var result = SHGetFileInfo(extension, FILE_ATTRIBUTE_NORMAL, ref shfi, (uint)Marshal.SizeOf(shfi),
+                SHGFI_ICON | SHGFI_LARGEICON | SHGFI_USEFILEATTRIBUTES);
+
+            if (result != IntPtr.Zero && shfi.hIcon != IntPtr.Zero)
+            {
+                try
+                {
+                    using var icon = Icon.FromHandle(shfi.hIcon);
+                    var bitmapSource = Imaging.CreateBitmapSourceFromHIcon(
+                        icon.Handle,
+                        Int32Rect.Empty,
+                        BitmapSizeOptions.FromEmptyOptions());
+                    bitmapSource.Freeze();
+                    return bitmapSource;
+                }
+                finally
+                {
+                    DestroyIcon(shfi.hIcon);
+                }
+            }
+
+            return null;
         }
 
         public ImageSource? LoadCustomIcon(string iconPath)
@@ -239,6 +343,158 @@ namespace DesktopLauncher.Services
             }
 
             return null;
+        }
+
+        public string? GetIconBase64FromPath(string path)
+        {
+            try
+            {
+                var icon = GetIconFromPath(path);
+                if (icon != null)
+                {
+                    return ConvertToBase64(icon);
+                }
+            }
+            catch
+            {
+                // 失敗時はnullを返す
+            }
+
+            return null;
+        }
+
+        public string? DownloadFaviconAsBase64(string url)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(url) || !IsUrl(url))
+                {
+                    return null;
+                }
+
+                // URLからドメインを抽出
+                var uri = new Uri(url);
+                var domain = uri.Host;
+
+                // Google Favicon APIを使用してファビコンを取得
+                var faviconUrl = $"https://www.google.com/s2/favicons?domain={domain}&sz=64";
+
+                using var httpClient = new HttpClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(10);
+
+                var response = httpClient.GetAsync(faviconUrl).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var iconData = response.Content.ReadAsByteArrayAsync().Result;
+
+                    // 取得したアイコンが有効かチェック（最小サイズ）
+                    if (iconData.Length > 100)
+                    {
+                        // 画像をリサイズしてBase64に変換
+                        using var ms = new MemoryStream(iconData);
+                        var bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.StreamSource = ms;
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.EndInit();
+                        bitmap.Freeze();
+
+                        return ConvertToBase64(bitmap);
+                    }
+                }
+            }
+            catch
+            {
+                // ダウンロード失敗時はnullを返す
+            }
+
+            return null;
+        }
+
+        public ImageSource? LoadFromBase64(string base64)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(base64))
+                {
+                    return null;
+                }
+
+                var imageData = Convert.FromBase64String(base64);
+                using var ms = new MemoryStream(imageData);
+
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.StreamSource = ms;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+
+                return bitmap;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public string? ConvertToBase64(ImageSource imageSource, int size = 48)
+        {
+            try
+            {
+                if (imageSource == null)
+                {
+                    return null;
+                }
+
+                // BitmapSourceに変換
+                BitmapSource bitmapSource;
+                if (imageSource is BitmapSource bs)
+                {
+                    bitmapSource = bs;
+                }
+                else
+                {
+                    return null;
+                }
+
+                // 指定サイズにリサイズ
+                var resized = ResizeBitmap(bitmapSource, size, size);
+
+                // PNGにエンコード
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(resized));
+
+                using var ms = new MemoryStream();
+                encoder.Save(ms);
+
+                return Convert.ToBase64String(ms.ToArray());
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static BitmapSource ResizeBitmap(BitmapSource source, int width, int height)
+        {
+            var scaleX = width / source.Width;
+            var scaleY = height / source.Height;
+
+            var transform = new ScaleTransform(scaleX, scaleY);
+            var resized = new TransformedBitmap(source, transform);
+
+            // RenderTargetBitmapを使って固定サイズに変換
+            var renderTarget = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+            var visual = new DrawingVisual();
+            using (var context = visual.RenderOpen())
+            {
+                context.DrawImage(resized, new Rect(0, 0, width, height));
+            }
+            renderTarget.Render(visual);
+            renderTarget.Freeze();
+
+            return renderTarget;
         }
     }
 }

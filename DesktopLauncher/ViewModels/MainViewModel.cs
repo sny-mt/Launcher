@@ -41,6 +41,9 @@ namespace DesktopLauncher.ViewModels
         private ObservableCollection<GridSlotViewModel> _gridSlots;
 
         [ObservableProperty]
+        private ObservableCollection<GridSlotViewModel> _searchGridSlots;
+
+        [ObservableProperty]
         private LauncherItemViewModel? _selectedItem;
 
         [ObservableProperty]
@@ -66,12 +69,20 @@ namespace DesktopLauncher.ViewModels
         [ObservableProperty]
         private int _selectedSlotIndex = -1;
 
+        public bool ShowTileView => string.IsNullOrWhiteSpace(SearchText);
+        public bool HasSearchText => !string.IsNullOrWhiteSpace(SearchText);
+
         partial void OnSelectedSlotIndexChanged(int value)
         {
             // グリッドスロットの選択状態を更新
             for (int i = 0; i < GridSlots.Count; i++)
             {
                 GridSlots[i].IsSelected = (i == value);
+            }
+            // 検索グリッドスロットの選択状態を更新
+            for (int i = 0; i < SearchGridSlots.Count; i++)
+            {
+                SearchGridSlots[i].IsSelected = (i == value);
             }
         }
 
@@ -104,6 +115,7 @@ namespace DesktopLauncher.ViewModels
             _categories = new ObservableCollection<CategoryViewModel>();
             _displayedItems = new ObservableCollection<LauncherItemViewModel>();
             _gridSlots = new ObservableCollection<GridSlotViewModel>();
+            _searchGridSlots = new ObservableCollection<GridSlotViewModel>();
             _settings = _settingsRepository.Get();
 
             InitializeGridSlots();
@@ -169,6 +181,8 @@ namespace DesktopLauncher.ViewModels
         partial void OnSearchTextChanged(string value)
         {
             FilterItems();
+            OnPropertyChanged(nameof(ShowTileView));
+            OnPropertyChanged(nameof(HasSearchText));
         }
 
         partial void OnSelectedCategoryChanged(CategoryViewModel? value)
@@ -183,6 +197,9 @@ namespace DesktopLauncher.ViewModels
         private void LoadData()
         {
             Categories.Clear();
+
+            // 既存アイテムの移行処理
+            MigrateIconsToBase64();
 
             foreach (var category in _categoryRepository.GetAll())
             {
@@ -200,6 +217,54 @@ namespace DesktopLauncher.ViewModels
             if (Categories.Any())
             {
                 SelectedCategory = Categories.First();
+            }
+        }
+
+        /// <summary>
+        /// 既存アイテムのアイコンをBase64形式に移行する
+        /// </summary>
+        private void MigrateIconsToBase64()
+        {
+            var allItems = _itemRepository.GetAll();
+            var needsSave = false;
+
+            foreach (var item in allItems)
+            {
+                // 既にBase64アイコンがある場合はスキップ
+                if (!string.IsNullOrEmpty(item.IconBase64))
+                {
+                    continue;
+                }
+
+                // CustomIconPathからBase64に変換
+                if (!string.IsNullOrEmpty(item.CustomIconPath))
+                {
+                    var customIcon = _iconService.LoadCustomIcon(item.CustomIconPath!);
+                    if (customIcon != null)
+                    {
+                        item.IconBase64 = _iconService.ConvertToBase64(customIcon);
+                        item.CustomIconPath = null; // パスをクリア
+                        _itemRepository.Update(item);
+                        needsSave = true;
+                        continue;
+                    }
+                }
+
+                // パスからアイコンを取得してBase64に変換
+                if (!string.IsNullOrEmpty(item.Path))
+                {
+                    item.IconBase64 = _iconService.GetIconBase64FromPath(item.Path);
+                    if (!string.IsNullOrEmpty(item.IconBase64))
+                    {
+                        _itemRepository.Update(item);
+                        needsSave = true;
+                    }
+                }
+            }
+
+            if (needsSave)
+            {
+                _itemRepository.Save();
             }
         }
 
@@ -245,6 +310,18 @@ namespace DesktopLauncher.ViewModels
                         DisplayedItems.Add(vm);
                     }
                 }
+
+                // SearchGridSlotsを更新
+                SearchGridSlots.Clear();
+                for (int i = 0; i < TotalSlots; i++)
+                {
+                    var slot = new GridSlotViewModel { SlotIndex = i };
+                    if (i < DisplayedItems.Count)
+                    {
+                        slot.Item = DisplayedItems[i];
+                    }
+                    SearchGridSlots.Add(slot);
+                }
             }
             else
             {
@@ -256,6 +333,25 @@ namespace DesktopLauncher.ViewModels
                         GridSlots[pos].Item = itemVm;
                     }
                 }
+            }
+
+            // 選択状態を再適用
+            RefreshSelectionState();
+        }
+
+        /// <summary>
+        /// スロットの選択状態を再適用する
+        /// </summary>
+        private void RefreshSelectionState()
+        {
+            var currentSelection = SelectedSlotIndex;
+            for (int i = 0; i < GridSlots.Count; i++)
+            {
+                GridSlots[i].IsSelected = (i == currentSelection);
+            }
+            for (int i = 0; i < SearchGridSlots.Count; i++)
+            {
+                SearchGridSlots[i].IsSelected = (i == currentSelection);
             }
         }
 
@@ -633,6 +729,7 @@ namespace DesktopLauncher.ViewModels
                 return;
             }
 
+            // タイル表示モードの場合
             // 初期選択
             if (SelectedSlotIndex < 0)
             {
@@ -659,20 +756,24 @@ namespace DesktopLauncher.ViewModels
 
         private void NavigateSearchResults(int deltaX, int deltaY)
         {
-            if (DisplayedItems.Count == 0) return;
+            if (SearchGridSlots.Count == 0) return;
 
             var currentIndex = SelectedSlotIndex;
             if (currentIndex < 0) currentIndex = 0;
 
-            // 横方向の移動
-            var newIndex = currentIndex + deltaX;
+            // 現在の行と列を計算
+            var currentRow = currentIndex / GridColumns;
+            var currentCol = currentIndex % GridColumns;
 
-            // 縦方向は行単位で移動（仮に1行4個と仮定）
-            var itemsPerRow = Math.Max(1, (int)(700 / 80)); // ウィンドウ幅 / タイルサイズ概算
-            newIndex += deltaY * itemsPerRow;
+            // 新しい位置を計算
+            var newCol = Math.Max(0, Math.Min(GridColumns - 1, currentCol + deltaX));
+            var newRow = Math.Max(0, Math.Min(GridRows - 1, currentRow + deltaY));
+            var newIndex = newRow * GridColumns + newCol;
 
-            newIndex = Math.Max(0, Math.Min(DisplayedItems.Count - 1, newIndex));
-            SelectedSlotIndex = newIndex;
+            if (newIndex >= 0 && newIndex < TotalSlots)
+            {
+                SelectedSlotIndex = newIndex;
+            }
         }
 
         /// <summary>
@@ -682,17 +783,17 @@ namespace DesktopLauncher.ViewModels
         {
             if (SelectedSlotIndex < 0) return null;
 
-            // 検索中は検索結果から取得
+            // 検索中は検索グリッドスロットから取得
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                if (SelectedSlotIndex < DisplayedItems.Count)
+                if (SelectedSlotIndex < SearchGridSlots.Count)
                 {
-                    return DisplayedItems[SelectedSlotIndex];
+                    return SearchGridSlots[SelectedSlotIndex].Item;
                 }
                 return null;
             }
 
-            // 通常表示はグリッドスロットから取得
+            // タイル表示はグリッドスロットから取得
             if (SelectedSlotIndex < GridSlots.Count)
             {
                 return GridSlots[SelectedSlotIndex].Item;

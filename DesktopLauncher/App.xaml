@@ -16,6 +16,7 @@
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:TileSizeToDoubleConverter x:Key="TileSizeToDoubleConverter"/>
             <converters:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+            <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
 
         </ResourceDictionary>

@@ -35,17 +35,17 @@ namespace DesktopLauncher.Infrastructure.Converters
                     },
                     "Font" => tileSize switch
                     {
-                        TileSize.Small => 8.0,
-                        TileSize.Medium => 9.0,
-                        TileSize.Large => 10.0,
-                        _ => 9.0
+                        TileSize.Small => 10.0,
+                        TileSize.Medium => 11.0,
+                        TileSize.Large => 12.0,
+                        _ => 11.0
                     },
                     "TextHeight" => tileSize switch
                     {
-                        TileSize.Small => 24.0,
-                        TileSize.Medium => 30.0,
-                        TileSize.Large => 36.0,
-                        _ => 30.0
+                        TileSize.Small => 44.0,
+                        TileSize.Medium => 50.0,
+                        TileSize.Large => 56.0,
+                        _ => 50.0
                     },
                     _ => tileSize switch
                     {

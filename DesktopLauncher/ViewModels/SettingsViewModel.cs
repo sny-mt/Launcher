@@ -33,13 +33,16 @@ namespace DesktopLauncher.ViewModels
         private double _windowOpacity;
 
         [ObservableProperty]
-        private ViewMode _viewMode;
-
-        [ObservableProperty]
-        private CategoryDisplayMode _categoryDisplayMode;
-
-        [ObservableProperty]
         private TileSize _tileSize;
+
+        [ObservableProperty]
+        private double _fontSize;
+
+        [ObservableProperty]
+        private string _fontFamily = "Yu Gothic UI";
+
+        [ObservableProperty]
+        private double _iconSize;
 
         [ObservableProperty]
         private bool _startWithWindows;
@@ -75,9 +78,10 @@ namespace DesktopLauncher.ViewModels
             Theme = settings.Theme;
             ThemeColor = settings.ThemeColor;
             WindowOpacity = settings.WindowOpacity;
-            ViewMode = settings.ViewMode;
-            CategoryDisplayMode = settings.CategoryDisplayMode;
             TileSize = settings.TileSize;
+            FontSize = settings.FontSize;
+            FontFamily = settings.FontFamily;
+            IconSize = settings.IconSize;
             StartWithWindows = settings.StartWithWindows;
             StartMinimized = settings.StartMinimized;
             HideAfterLaunch = settings.HideAfterLaunch;
@@ -123,9 +127,10 @@ namespace DesktopLauncher.ViewModels
                 Theme = Theme,
                 ThemeColor = ThemeColor,
                 WindowOpacity = WindowOpacity,
-                ViewMode = ViewMode,
-                CategoryDisplayMode = CategoryDisplayMode,
                 TileSize = TileSize,
+                FontSize = FontSize,
+                FontFamily = FontFamily,
+                IconSize = IconSize,
                 StartWithWindows = StartWithWindows,
                 StartMinimized = StartMinimized,
                 HideAfterLaunch = HideAfterLaunch
@@ -150,9 +155,10 @@ namespace DesktopLauncher.ViewModels
                 Theme = Theme,
                 ThemeColor = ThemeColor,
                 WindowOpacity = WindowOpacity,
-                ViewMode = ViewMode,
-                CategoryDisplayMode = CategoryDisplayMode,
                 TileSize = TileSize,
+                FontSize = FontSize,
+                FontFamily = FontFamily,
+                IconSize = IconSize,
                 StartWithWindows = StartWithWindows,
                 StartMinimized = StartMinimized,
                 HideAfterLaunch = HideAfterLaunch
