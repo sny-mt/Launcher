@@ -140,13 +140,34 @@ namespace DesktopLauncher
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            // 検索ボックスに文字がある場合は左右キーをテキスト編集用に使用
             var hasSearchText = !string.IsNullOrEmpty(_viewModel.SearchText);
+            var hasSlotSelection = _viewModel.SelectedSlotIndex >= 0;
 
-            if (e.Key == Key.Escape)
+            // 検索中で左右キー: スロット選択がなければテキスト編集用に使用
+            var allowLeftRight = !hasSearchText || hasSlotSelection;
+
+            if (e.Key == Key.E && Keyboard.Modifiers == ModifierKeys.Control)
             {
-                HideWindow();
+                // Ctrl+E: 検索ボックスにフォーカス
+                _viewModel.ResetSelection();
+                SearchBox.Focus();
+                SearchBox.SelectAll();
                 e.Handled = true;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                // 検索中でスロット選択がある場合は選択解除
+                if (hasSearchText && hasSlotSelection)
+                {
+                    _viewModel.ResetSelection();
+                    SearchBox.Focus();
+                    e.Handled = true;
+                }
+                else
+                {
+                    HideWindow();
+                    e.Handled = true;
+                }
             }
             else if (e.Key == Key.Tab)
             {
@@ -161,12 +182,12 @@ namespace DesktopLauncher
                 }
                 e.Handled = true;
             }
-            else if (e.Key == Key.Left && !hasSearchText)
+            else if (e.Key == Key.Left && allowLeftRight)
             {
                 _viewModel.NavigateSlot(-1, 0);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Right && !hasSearchText)
+            else if (e.Key == Key.Right && allowLeftRight)
             {
                 _viewModel.NavigateSlot(1, 0);
                 e.Handled = true;
@@ -190,9 +211,9 @@ namespace DesktopLauncher
                     _viewModel.LaunchItemCommand.Execute(selectedItem);
                     e.Handled = true;
                 }
-                else if (_viewModel.DisplayedItems.Any())
+                else if (!hasSlotSelection && _viewModel.DisplayedItems.Any())
                 {
-                    // 選択がなければ最初のアイテムを起動
+                    // スロット選択がなく、表示アイテムがある場合のみ最初のアイテムを起動
                     var firstItem = _viewModel.DisplayedItems.First();
                     _viewModel.LaunchItemCommand.Execute(firstItem);
                     e.Handled = true;
@@ -281,6 +302,7 @@ namespace DesktopLauncher
         {
             Close();
         }
+
 
         #region タイルのドラッグ&ドロップ
 

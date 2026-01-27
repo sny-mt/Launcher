@@ -18,6 +18,7 @@
             <converters:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
             <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:EqualityConverter x:Key="EqualityConverter"/>
 
         </ResourceDictionary>
     </Application.Resources>

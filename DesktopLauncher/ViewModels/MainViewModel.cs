@@ -44,6 +44,9 @@ namespace DesktopLauncher.ViewModels
         private ObservableCollection<GridSlotViewModel> _searchGridSlots;
 
         [ObservableProperty]
+        private ObservableCollection<CategoryViewModel> _filteredCategories;
+
+        [ObservableProperty]
         private LauncherItemViewModel? _selectedItem;
 
         [ObservableProperty]
@@ -116,6 +119,7 @@ namespace DesktopLauncher.ViewModels
             _displayedItems = new ObservableCollection<LauncherItemViewModel>();
             _gridSlots = new ObservableCollection<GridSlotViewModel>();
             _searchGridSlots = new ObservableCollection<GridSlotViewModel>();
+            _filteredCategories = new ObservableCollection<CategoryViewModel>();
             _settings = _settingsRepository.Get();
 
             InitializeGridSlots();
@@ -183,6 +187,9 @@ namespace DesktopLauncher.ViewModels
             FilterItems();
             OnPropertyChanged(nameof(ShowTileView));
             OnPropertyChanged(nameof(HasSearchText));
+
+            // 検索テキストが変わったら選択をリセット
+            SelectedSlotIndex = -1;
         }
 
         partial void OnSelectedCategoryChanged(CategoryViewModel? value)
@@ -292,6 +299,18 @@ namespace DesktopLauncher.ViewModels
                 else
                 {
                     category.SearchMatchCount = 0;
+                }
+            }
+
+            // フィルタ済みカテゴリを更新（マッチ数が多い順）
+            FilteredCategories.Clear();
+            if (hasSearch)
+            {
+                foreach (var category in Categories
+                    .Where(c => c.SearchMatchCount > 0)
+                    .OrderByDescending(c => c.SearchMatchCount))
+                {
+                    FilteredCategories.Add(category);
                 }
             }
 
@@ -519,6 +538,15 @@ namespace DesktopLauncher.ViewModels
         }
 
         [RelayCommand]
+        private void SelectCategory(CategoryViewModel? category)
+        {
+            if (category != null)
+            {
+                SelectedCategory = category;
+            }
+        }
+
+        [RelayCommand]
         private void AddCategory()
         {
             var editWindow = new Views.CategoryEditWindow();
@@ -694,11 +722,16 @@ namespace DesktopLauncher.ViewModels
         /// </summary>
         public void SelectNextCategory()
         {
-            if (Categories.Count == 0) return;
+            // 検索中はフィルタ済みカテゴリを使用
+            var targetCategories = HasSearchText && FilteredCategories.Count > 0
+                ? FilteredCategories
+                : Categories;
 
-            var currentIndex = SelectedCategory != null ? Categories.IndexOf(SelectedCategory) : -1;
-            var nextIndex = (currentIndex + 1) % Categories.Count;
-            SelectedCategory = Categories[nextIndex];
+            if (targetCategories.Count == 0) return;
+
+            var currentIndex = SelectedCategory != null ? targetCategories.IndexOf(SelectedCategory) : -1;
+            var nextIndex = (currentIndex + 1) % targetCategories.Count;
+            SelectedCategory = targetCategories[nextIndex];
             SelectedSlotIndex = -1;
         }
 
@@ -707,11 +740,16 @@ namespace DesktopLauncher.ViewModels
         /// </summary>
         public void SelectPreviousCategory()
         {
-            if (Categories.Count == 0) return;
+            // 検索中はフィルタ済みカテゴリを使用
+            var targetCategories = HasSearchText && FilteredCategories.Count > 0
+                ? FilteredCategories
+                : Categories;
 
-            var currentIndex = SelectedCategory != null ? Categories.IndexOf(SelectedCategory) : 0;
-            var prevIndex = (currentIndex - 1 + Categories.Count) % Categories.Count;
-            SelectedCategory = Categories[prevIndex];
+            if (targetCategories.Count == 0) return;
+
+            var currentIndex = SelectedCategory != null ? targetCategories.IndexOf(SelectedCategory) : 0;
+            var prevIndex = (currentIndex - 1 + targetCategories.Count) % targetCategories.Count;
+            SelectedCategory = targetCategories[prevIndex];
             SelectedSlotIndex = -1;
         }
 
@@ -758,12 +796,25 @@ namespace DesktopLauncher.ViewModels
         {
             if (SearchGridSlots.Count == 0) return;
 
-            var currentIndex = SelectedSlotIndex;
-            if (currentIndex < 0) currentIndex = 0;
+            // 初期選択: 最初のアイテムがあるスロットを選択
+            if (SelectedSlotIndex < 0)
+            {
+                // 検索結果の最初のアイテムを選択
+                for (int i = 0; i < SearchGridSlots.Count; i++)
+                {
+                    if (SearchGridSlots[i].HasItem)
+                    {
+                        SelectedSlotIndex = i;
+                        return;
+                    }
+                }
+                SelectedSlotIndex = 0;
+                return;
+            }
 
             // 現在の行と列を計算
-            var currentRow = currentIndex / GridColumns;
-            var currentCol = currentIndex % GridColumns;
+            var currentRow = SelectedSlotIndex / GridColumns;
+            var currentCol = SelectedSlotIndex % GridColumns;
 
             // 新しい位置を計算
             var newCol = Math.Max(0, Math.Min(GridColumns - 1, currentCol + deltaX));

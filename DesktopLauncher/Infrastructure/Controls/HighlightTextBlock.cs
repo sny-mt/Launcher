@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -8,6 +10,7 @@ namespace DesktopLauncher.Infrastructure.Controls
 {
     /// <summary>
     /// 検索キーワードをハイライト表示するTextBlock
+    /// スペース区切りで複数キーワードに対応
     /// </summary>
     public class HighlightTextBlock : TextBlock
     {
@@ -89,42 +92,79 @@ namespace DesktopLauncher.Infrastructure.Controls
                 return;
             }
 
-            var currentIndex = 0;
-            var lowerSource = sourceText.ToLower();
-            var lowerHighlight = highlightText.ToLower();
+            // スペースで分割して複数キーワードに対応
+            var keywords = highlightText
+                .Split(new[] { ' ', '\u3000' }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(k => !string.IsNullOrWhiteSpace(k))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
 
+            if (keywords.Length == 0)
+            {
+                Inlines.Add(new Run(sourceText));
+                return;
+            }
+
+            // 各文字位置がハイライト対象かどうかをマーク
+            var highlightFlags = new bool[sourceText.Length];
+            var lowerSource = sourceText.ToLower();
+
+            foreach (var keyword in keywords)
+            {
+                var lowerKeyword = keyword.ToLower();
+                var searchIndex = 0;
+
+                while (searchIndex < lowerSource.Length)
+                {
+                    var matchIndex = lowerSource.IndexOf(lowerKeyword, searchIndex, StringComparison.Ordinal);
+                    if (matchIndex < 0) break;
+
+                    // マッチした範囲をマーク
+                    for (int i = matchIndex; i < matchIndex + keyword.Length && i < highlightFlags.Length; i++)
+                    {
+                        highlightFlags[i] = true;
+                    }
+
+                    searchIndex = matchIndex + 1;
+                }
+            }
+
+            // フラグに基づいてRunを生成
+            var currentIndex = 0;
             while (currentIndex < sourceText.Length)
             {
-                var matchIndex = lowerSource.IndexOf(lowerHighlight, currentIndex, StringComparison.Ordinal);
+                var isHighlight = highlightFlags[currentIndex];
+                var endIndex = currentIndex + 1;
 
-                if (matchIndex < 0)
+                // 同じ状態が続く範囲を探す
+                while (endIndex < sourceText.Length && highlightFlags[endIndex] == isHighlight)
                 {
-                    // 残りのテキストを追加
-                    Inlines.Add(new Run(sourceText.Substring(currentIndex)));
-                    break;
+                    endIndex++;
                 }
 
-                // マッチ前のテキストを追加
-                if (matchIndex > currentIndex)
+                var text = sourceText.Substring(currentIndex, endIndex - currentIndex);
+
+                if (isHighlight)
                 {
-                    Inlines.Add(new Run(sourceText.Substring(currentIndex, matchIndex - currentIndex)));
+                    var highlightRun = new Run(text)
+                    {
+                        Background = HighlightBrush,
+                        FontWeight = FontWeights.Bold
+                    };
+
+                    if (HighlightForeground != null)
+                    {
+                        highlightRun.Foreground = HighlightForeground;
+                    }
+
+                    Inlines.Add(highlightRun);
+                }
+                else
+                {
+                    Inlines.Add(new Run(text));
                 }
 
-                // ハイライト部分を追加
-                var highlightRun = new Run(sourceText.Substring(matchIndex, highlightText.Length))
-                {
-                    Background = HighlightBrush,
-                    FontWeight = FontWeights.Bold
-                };
-
-                if (HighlightForeground != null)
-                {
-                    highlightRun.Foreground = HighlightForeground;
-                }
-
-                Inlines.Add(highlightRun);
-
-                currentIndex = matchIndex + highlightText.Length;
+                currentIndex = endIndex;
             }
         }
     }
