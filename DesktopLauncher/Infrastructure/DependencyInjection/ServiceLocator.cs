@@ -1,9 +1,20 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using DesktopLauncher.Interfaces.Repositories;
-using DesktopLauncher.Interfaces.Services;
+using DesktopLauncher.Interfaces.Services.Icons;
+using DesktopLauncher.Interfaces.Services.Data;
+using DesktopLauncher.Interfaces.Services.Operations;
+using DesktopLauncher.Interfaces.Services.Ui;
+using DesktopLauncher.Interfaces.Services.Shell;
+using DesktopLauncher.Interfaces.Services.Search;
 using DesktopLauncher.Repositories;
 using DesktopLauncher.Services;
+using DesktopLauncher.Services.Icons;
+using DesktopLauncher.Services.Data;
+using DesktopLauncher.Services.Operations;
+using DesktopLauncher.Services.Ui;
+using DesktopLauncher.Services.Shell;
+using DesktopLauncher.Services.Search;
 using DesktopLauncher.ViewModels;
 
 namespace DesktopLauncher.Infrastructure.DependencyInjection

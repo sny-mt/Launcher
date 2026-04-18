@@ -1,7 +1,12 @@
 using System.Windows;
 using System.Windows.Input;
 using DesktopLauncher.Infrastructure.DependencyInjection;
-using DesktopLauncher.Interfaces.Services;
+using DesktopLauncher.Interfaces.Services.Icons;
+using DesktopLauncher.Interfaces.Services.Data;
+using DesktopLauncher.Interfaces.Services.Operations;
+using DesktopLauncher.Interfaces.Services.Ui;
+using DesktopLauncher.Interfaces.Services.Shell;
+using DesktopLauncher.Interfaces.Services.Search;
 using DesktopLauncher.Models;
 using DesktopLauncher.ViewModels;
 

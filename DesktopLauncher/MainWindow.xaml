@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:DesktopLauncher.ViewModels"
-        xmlns:controls="clr-namespace:DesktopLauncher.Infrastructure.Controls"
+        xmlns:controls="clr-namespace:DesktopLauncher.Views.Controls"
         mc:Ignorable="d"
         Title="Desktop Launcher"
         Width="770" Height="600"

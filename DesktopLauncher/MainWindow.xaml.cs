@@ -6,7 +6,12 @@ using System.Windows.Input;
 using System.Windows.Media;
 using DesktopLauncher.Infrastructure.DependencyInjection;
 using DesktopLauncher.Infrastructure.Helpers;
-using DesktopLauncher.Interfaces.Services;
+using DesktopLauncher.Interfaces.Services.Icons;
+using DesktopLauncher.Interfaces.Services.Data;
+using DesktopLauncher.Interfaces.Services.Operations;
+using DesktopLauncher.Interfaces.Services.Ui;
+using DesktopLauncher.Interfaces.Services.Shell;
+using DesktopLauncher.Interfaces.Services.Search;
 using DesktopLauncher.Models;
 using DesktopLauncher.ViewModels;
 
@@ -239,7 +244,7 @@ namespace DesktopLauncher
             // テーマを適用
             if (settings.Theme == Models.Enums.Theme.Custom)
             {
-                var themeService = Infrastructure.DependencyInjection.ServiceLocator.GetService<Interfaces.Services.IThemeService>();
+                var themeService = Infrastructure.DependencyInjection.ServiceLocator.GetService<Interfaces.Services.Ui.IThemeService>();
                 themeService.ApplyCustomTheme(settings.CustomBaseColor, settings.CustomTextColor, settings.CustomAccentColor);
             }
             else
