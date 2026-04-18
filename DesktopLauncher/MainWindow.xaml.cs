@@ -237,8 +237,16 @@ namespace DesktopLauncher
             }
 
             // テーマを適用
-            app.ApplyTheme(settings.Theme);
-            app.ApplyThemeColor(settings.ThemeColor);
+            if (settings.Theme == Models.Enums.Theme.Custom)
+            {
+                var themeService = Infrastructure.DependencyInjection.ServiceLocator.GetService<Interfaces.Services.IThemeService>();
+                themeService.ApplyCustomTheme(settings.CustomBaseColor, settings.CustomTextColor, settings.CustomAccentColor);
+            }
+            else
+            {
+                app.ApplyTheme(settings.Theme);
+                app.ApplyThemeColor(settings.ThemeColor);
+            }
             app.ApplyWindowOpacity(settings.WindowOpacity);
 
             // スタートアップ登録

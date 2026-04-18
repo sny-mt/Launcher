@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DesktopLauncher.Models;
@@ -35,8 +36,12 @@ namespace DesktopLauncher.ViewModels
 
         public void UpdateModel(Category model)
         {
+            if (model == null) throw new ArgumentNullException(nameof(model));
+
             Model = model;
+            OnPropertyChanged(nameof(Id));
             OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(SortOrder));
             OnPropertyChanged(nameof(Icon));
         }
     }

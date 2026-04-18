@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
 using DesktopLauncher.Models;
 using Newtonsoft.Json;
 
@@ -10,6 +12,7 @@ namespace DesktopLauncher.Repositories
     /// </summary>
     public class JsonDataStore
     {
+        public string FilePath => _filePath;
         private readonly string _filePath;
         private LauncherData _data;
         private readonly object _lock = new object();
@@ -54,7 +57,20 @@ namespace DesktopLauncher.Repositories
                 {
                     TypeNameHandling = TypeNameHandling.None
                 });
-                File.WriteAllText(_filePath, json);
+
+                var tempFilePath = $"{_filePath}.tmp";
+                var backupFilePath = $"{_filePath}.bak";
+
+                File.WriteAllText(tempFilePath, json, Encoding.UTF8);
+
+                if (File.Exists(_filePath))
+                {
+                    File.Replace(tempFilePath, _filePath, backupFilePath, true);
+                }
+                else
+                {
+                    File.Move(tempFilePath, _filePath);
+                }
             }
         }
 
@@ -75,7 +91,7 @@ namespace DesktopLauncher.Repositories
             {
                 if (File.Exists(_filePath))
                 {
-                    var json = File.ReadAllText(_filePath);
+                    var json = File.ReadAllText(_filePath, Encoding.UTF8);
                     var data = JsonConvert.DeserializeObject<LauncherData>(json);
                     if (data != null)
                     {
@@ -83,9 +99,9 @@ namespace DesktopLauncher.Repositories
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // 読み込み失敗時は新規データを作成
+                Debug.WriteLine($"Data load failed from '{_filePath}': {ex.Message}");
             }
 
             // デフォルトデータを作成

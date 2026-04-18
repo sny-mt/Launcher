@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Microsoft.Win32;
 using DesktopLauncher.Interfaces.Services;
 
@@ -34,6 +35,12 @@ namespace DesktopLauncher.Services
         {
             var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
+            if (string.IsNullOrEmpty(exePath))
+            {
+                Debug.WriteLine("SetEnabled: exePath is null or empty, skipping registry write.");
+                return;
+            }
+
             try
             {
                 using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, true);
@@ -48,9 +55,9 @@ namespace DesktopLauncher.Services
                     key.DeleteValue(AppName, false);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // レジストリ操作に失敗しても無視
+                Debug.WriteLine($"SetEnabled failed: {ex.Message}");
             }
         }
     }

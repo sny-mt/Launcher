@@ -61,5 +61,9 @@ namespace DesktopLauncher.Interfaces.Services
         /// <param name="defaultValue">デフォルト値</param>
         /// <returns>入力されたテキスト（キャンセル時はnull）</returns>
         string? ShowInputDialog(string prompt, string title = "入力", string defaultValue = "");
+
+        string? ShowOpenFileDialog(string title, string filter);
+
+        string? ShowSaveFileDialog(string title, string filter, string defaultFileName = "");
     }
 }

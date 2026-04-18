@@ -95,6 +95,106 @@ namespace DesktopLauncher.Services
         }
 
         /// <inheritdoc/>
+        public void ApplyCustomTheme(string baseColorHex, string textColorHex, string accentColorHex)
+        {
+            var app = Application.Current;
+            if (app == null) return;
+
+            var baseColor = ParseColor(baseColorHex, Color.FromRgb(30, 30, 30));
+            var textColor = ParseColor(textColorHex, Color.FromRgb(255, 255, 255));
+            var accentColor = ParseColor(accentColorHex, Color.FromRgb(0, 120, 212));
+
+            // ベースカラーがライトかダークか判定して、適切なベーステーマをロード
+            var isLight = IsLightColor(baseColor);
+            var baseThemeUri = isLight
+                ? new Uri("Views/Themes/LightTheme.xaml", UriKind.Relative)
+                : new Uri("Views/Themes/DarkTheme.xaml", UriKind.Relative);
+
+            var resources = app.Resources.MergedDictionaries;
+            if (resources.Count > 0)
+            {
+                resources.RemoveAt(0);
+            }
+            resources.Insert(0, new ResourceDictionary { Source = baseThemeUri });
+
+            ClearThemeResourceOverrides(app);
+
+            // ベースカラーから派生色を自動算出
+            var secondary = ShiftColor(baseColor, isLight ? -10 : 10);
+            var tertiary = ShiftColor(baseColor, isLight ? -20 : 20);
+            var textSecondary = Color.FromArgb(180, textColor.R, textColor.G, textColor.B);
+            var border = Color.FromArgb(100, textColor.R, textColor.G, textColor.B);
+            var hover = Color.FromArgb(60, textColor.R, textColor.G, textColor.B);
+            var selected = Color.FromArgb(100, accentColor.R, accentColor.G, accentColor.B);
+            var accentHover = ShiftColor(accentColor, isLight ? -20 : 20);
+
+            // ベースカラーに透明度を適用（半透明ウィンドウ対応）
+            var primary = Color.FromArgb(224, baseColor.R, baseColor.G, baseColor.B);
+            var secondaryA = Color.FromArgb(208, secondary.R, secondary.G, secondary.B);
+            var tertiaryA = Color.FromArgb(192, tertiary.R, tertiary.G, tertiary.B);
+
+            app.Resources["PrimaryColor"] = primary;
+            app.Resources["SecondaryColor"] = secondaryA;
+            app.Resources["TertiaryColor"] = tertiaryA;
+            app.Resources["TextColor"] = textColor;
+            app.Resources["TextSecondaryColor"] = textSecondary;
+            app.Resources["BorderColor"] = border;
+            app.Resources["HoverColor"] = hover;
+            app.Resources["SelectedColor"] = selected;
+
+            app.Resources["PrimaryBrush"] = new SolidColorBrush(primary);
+            app.Resources["SecondaryBrush"] = new SolidColorBrush(secondaryA);
+            app.Resources["TertiaryBrush"] = new SolidColorBrush(tertiaryA);
+            app.Resources["TextBrush"] = new SolidColorBrush(textColor);
+            app.Resources["TextSecondaryBrush"] = new SolidColorBrush(textSecondary);
+            app.Resources["BorderBrush"] = new SolidColorBrush(border);
+            app.Resources["HoverBrush"] = new SolidColorBrush(hover);
+            app.Resources["SelectedBrush"] = new SolidColorBrush(selected);
+
+            // アクセントカラーも適用
+            app.Resources["AccentColor"] = accentColor;
+            app.Resources["AccentHoverColor"] = accentHover;
+            app.Resources["AccentBrush"] = new SolidColorBrush(accentColor);
+            app.Resources["AccentHoverBrush"] = new SolidColorBrush(accentHover);
+
+            // ダイアログ用（不透明）
+            var dialogPrimary = Color.FromArgb(255, baseColor.R, baseColor.G, baseColor.B);
+            var dialogSecondary = Color.FromArgb(255, secondary.R, secondary.G, secondary.B);
+            app.Resources["DialogPrimaryColor"] = dialogPrimary;
+            app.Resources["DialogSecondaryColor"] = dialogSecondary;
+            app.Resources["DialogPrimaryBrush"] = new SolidColorBrush(dialogPrimary);
+            app.Resources["DialogSecondaryBrush"] = new SolidColorBrush(dialogSecondary);
+        }
+
+        private static Color ParseColor(string hex, Color fallback)
+        {
+            try
+            {
+                var obj = ColorConverter.ConvertFromString(hex);
+                return obj is Color c ? c : fallback;
+            }
+            catch
+            {
+                return fallback;
+            }
+        }
+
+        private static bool IsLightColor(Color color)
+        {
+            // 相対輝度で判定
+            var luminance = 0.299 * color.R + 0.587 * color.G + 0.114 * color.B;
+            return luminance > 128;
+        }
+
+        private static Color ShiftColor(Color color, int amount)
+        {
+            return Color.FromRgb(
+                (byte)Math.Max(0, Math.Min(255, color.R + amount)),
+                (byte)Math.Max(0, Math.Min(255, color.G + amount)),
+                (byte)Math.Max(0, Math.Min(255, color.B + amount)));
+        }
+
+        /// <inheritdoc/>
         public bool IsLightBasedTheme(Theme theme)
         {
             return theme switch
@@ -106,6 +206,7 @@ namespace DesktopLauncher.Services
                 Theme.Peach => true,
                 Theme.Milky => true,
                 Theme.Dreamy => true,
+                Theme.Custom => false, // Custom時はApplyCustomTheme内で判定
                 _ => false
             };
         }
@@ -118,7 +219,11 @@ namespace DesktopLauncher.Services
                 "HoverColor", "SelectedColor",
                 "PrimaryBrush", "SecondaryBrush", "TertiaryBrush",
                 "TextBrush", "TextSecondaryBrush", "BorderBrush",
-                "HoverBrush", "SelectedBrush"
+                "HoverBrush", "SelectedBrush",
+                "DialogPrimaryColor", "DialogSecondaryColor",
+                "DialogPrimaryBrush", "DialogSecondaryBrush",
+                "AccentColor", "AccentHoverColor",
+                "AccentBrush", "AccentHoverBrush"
             };
 
             foreach (var key in keysToRemove)

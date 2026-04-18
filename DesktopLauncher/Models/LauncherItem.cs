@@ -72,5 +72,20 @@ namespace DesktopLauncher.Models
         /// 更新日時
         /// </summary>
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// 起動回数
+        /// </summary>
+        public int LaunchCount { get; set; }
+
+        /// <summary>
+        /// 最終起動日時
+        /// </summary>
+        public DateTime? LastLaunchedAt { get; set; }
+
+        /// <summary>
+        /// お気に入りフラグ
+        /// </summary>
+        public bool IsFavorite { get; set; }
     }
 }

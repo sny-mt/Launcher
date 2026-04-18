@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using DesktopLauncher.Interfaces.Services;
 using DesktopLauncher.Models;
 using DesktopLauncher.Models.Enums;
+using DesktopLauncher.Services;
 using DesktopLauncher.ViewModels.Base;
 
 namespace DesktopLauncher.ViewModels
@@ -80,7 +81,7 @@ namespace DesktopLauncher.ViewModels
         partial void OnPathChanged(string value)
         {
             // URLの場合は自動的にItemTypeを設定
-            if (Services.IconService.IsUrl(value))
+            if (UrlHelper.IsUrl(value))
             {
                 ItemType = ItemType.Url;
             }
@@ -197,7 +198,7 @@ namespace DesktopLauncher.ViewModels
             // カスタムアイコンがない場合はパスから取得
             if (string.IsNullOrEmpty(iconBase64))
             {
-                if (Services.IconService.IsUrl(Path))
+                if (UrlHelper.IsUrl(Path))
                 {
                     iconBase64 = _iconService.DownloadFaviconAsBase64(Path);
                 }
@@ -240,5 +241,6 @@ namespace DesktopLauncher.ViewModels
 
             return true;
         }
+
     }
 }

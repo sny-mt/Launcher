@@ -44,16 +44,7 @@ namespace DesktopLauncher.Services
             };
 
             // アイコンをBase64で保存
-            if (_itemTypeDetectionService.IsUrl(path))
-            {
-                // URLの場合はファビコンを取得
-                item.IconBase64 = _iconService.DownloadFaviconAsBase64(path);
-            }
-            else
-            {
-                // ファイル/フォルダの場合はアイコンを取得
-                item.IconBase64 = _iconService.GetIconBase64FromPath(path);
-            }
+            item.IconBase64 = ResolveIconBase64(path);
 
             _itemRepository.Add(item);
             _itemRepository.Save();
@@ -98,16 +89,7 @@ namespace DesktopLauncher.Services
             };
 
             // アイコンをBase64で保存
-            if (_itemTypeDetectionService.IsUrl(path))
-            {
-                // URLの場合はファビコンを取得
-                item.IconBase64 = _iconService.DownloadFaviconAsBase64(path);
-            }
-            else
-            {
-                // ファイル/フォルダの場合はアイコンを取得
-                item.IconBase64 = _iconService.GetIconBase64FromPath(path);
-            }
+            item.IconBase64 = ResolveIconBase64(path);
 
             _itemRepository.Add(item);
             _itemRepository.Save();
@@ -116,6 +98,15 @@ namespace DesktopLauncher.Services
             category.Items.Add(itemVm);
 
             return itemVm;
+        }
+
+        private string? ResolveIconBase64(string path)
+        {
+            if (UrlHelper.IsUrl(path))
+            {
+                return _iconService.DownloadFaviconAsBase64(path);
+            }
+            return _iconService.GetIconBase64FromPath(path);
         }
 
         /// <inheritdoc/>

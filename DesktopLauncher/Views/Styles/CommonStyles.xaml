@@ -1,5 +1,13 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!-- フォントサイズ定数 -->
+    <system:Double x:Key="TitleFontSize">14</system:Double>
+    <system:Double x:Key="BodyFontSize">13</system:Double>
+    <system:Double x:Key="CaptionFontSize">11</system:Double>
+    <system:Double x:Key="SmallFontSize">10</system:Double>
+    <system:Double x:Key="IconFontSize">12</system:Double>
 
     <!-- テキストボックススタイル（Tag でウォーターマークをカスタマイズ可能） -->
     <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">

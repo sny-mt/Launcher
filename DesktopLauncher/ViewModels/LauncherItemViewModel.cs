@@ -33,6 +33,8 @@ namespace DesktopLauncher.ViewModels
         public ItemType ItemType => Model.ItemType;
         public string CategoryId => Model.CategoryId;
         public int SortOrder => Model.SortOrder;
+        public bool IsFavorite => Model.IsFavorite;
+        public int LaunchCount => Model.LaunchCount;
 
         public int GridPosition
         {
@@ -63,8 +65,8 @@ namespace DesktopLauncher.ViewModels
                 if (Icon != null) return;
             }
 
-            // 3. パスからアイコンを取得
-            Icon = _iconService.GetIconFromPath(Model.Path);
+            // 3. パスからアイコンを取得（取得できなければデフォルトアイコン）
+            Icon = _iconService.GetIconFromPath(Model.Path) ?? _iconService.GetDefaultIcon();
         }
 
         public void UpdateModel(LauncherItem model)
@@ -74,6 +76,10 @@ namespace DesktopLauncher.ViewModels
             OnPropertyChanged(nameof(Path));
             OnPropertyChanged(nameof(ItemType));
             OnPropertyChanged(nameof(CategoryId));
+            OnPropertyChanged(nameof(IsFavorite));
+            OnPropertyChanged(nameof(LaunchCount));
+            OnPropertyChanged(nameof(SortOrder));
+            OnPropertyChanged(nameof(GridPosition));
             LoadIcon();
         }
     }

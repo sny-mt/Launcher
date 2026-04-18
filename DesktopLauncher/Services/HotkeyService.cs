@@ -15,6 +15,11 @@ namespace DesktopLauncher.Services
         private const int WM_HOTKEY = 0x0312;
         private const int HOTKEY_ID = 9000;
 
+        private const uint MOD_ALT = 0x0001;
+        private const uint MOD_CONTROL = 0x0002;
+        private const uint MOD_SHIFT = 0x0004;
+        private const uint MOD_WIN = 0x0008;
+
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
@@ -40,13 +45,14 @@ namespace DesktopLauncher.Services
             var helper = new WindowInteropHelper(window);
             _windowHandle = helper.EnsureHandle();
             _source = HwndSource.FromHwnd(_windowHandle);
-            _source?.AddHook(HwndHook);
+            if (_source == null) return false;
+            _source.AddHook(HwndHook);
 
             uint mod = 0;
-            if (modifiers.HasFlag(ModifierKeys.Alt)) mod |= 0x0001;
-            if (modifiers.HasFlag(ModifierKeys.Control)) mod |= 0x0002;
-            if (modifiers.HasFlag(ModifierKeys.Shift)) mod |= 0x0004;
-            if (modifiers.HasFlag(ModifierKeys.Windows)) mod |= 0x0008;
+            if (modifiers.HasFlag(ModifierKeys.Alt)) mod |= MOD_ALT;
+            if (modifiers.HasFlag(ModifierKeys.Control)) mod |= MOD_CONTROL;
+            if (modifiers.HasFlag(ModifierKeys.Shift)) mod |= MOD_SHIFT;
+            if (modifiers.HasFlag(ModifierKeys.Windows)) mod |= MOD_WIN;
 
             uint vk = (uint)KeyInterop.VirtualKeyFromKey(key);
 

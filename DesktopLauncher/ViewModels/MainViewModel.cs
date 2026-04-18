@@ -8,6 +8,7 @@ using DesktopLauncher.Interfaces.Repositories;
 using DesktopLauncher.Interfaces.Services;
 using DesktopLauncher.Models;
 using DesktopLauncher.Models.Enums;
+using DesktopLauncher.Services;
 using DesktopLauncher.ViewModels.Base;
 
 namespace DesktopLauncher.ViewModels
@@ -287,14 +288,20 @@ namespace DesktopLauncher.ViewModels
             var hasSearch = !string.IsNullOrWhiteSpace(SearchText);
 
             // すべてのカテゴリの検索結果数を更新
+            System.Collections.Generic.IEnumerable<LauncherItem>? selectedCategorySearchResult = null;
             foreach (var category in Categories)
             {
                 category.HasSearchText = hasSearch;
                 if (hasSearch)
                 {
                     var categoryItems = category.Items.Select(vm => vm.Model);
-                    var matchedItems = _searchService.Search(categoryItems, SearchText);
-                    category.SearchMatchCount = matchedItems.Count();
+                    var searchResult = _searchService.Search(categoryItems, SearchText).ToList();
+                    category.SearchMatchCount = searchResult.Count;
+
+                    if (category == SelectedCategory)
+                    {
+                        selectedCategorySearchResult = searchResult;
+                    }
                 }
                 else
                 {
@@ -316,11 +323,10 @@ namespace DesktopLauncher.ViewModels
 
             if (SelectedCategory == null) return;
 
-            var items = SelectedCategory.Items.Select(vm => vm.Model);
-
             if (hasSearch)
             {
-                items = _searchService.Search(items, SearchText);
+                var items = selectedCategorySearchResult
+                    ?? _searchService.Search(SelectedCategory.Items.Select(vm => vm.Model), SearchText);
                 foreach (var item in items)
                 {
                     var vm = SelectedCategory.Items.FirstOrDefault(x => x.Id == item.Id);
@@ -382,6 +388,8 @@ namespace DesktopLauncher.ViewModels
             var success = _launcherService.Launch(item.Model);
             if (success)
             {
+                _itemRepository.Update(item.Model);
+                _itemRepository.Save();
                 RequestDeactivate?.Invoke(this, EventArgs.Empty);
             }
             else
@@ -398,11 +406,53 @@ namespace DesktopLauncher.ViewModels
             var success = _launcherService.Launch(item.Model, runAsAdmin: true);
             if (success)
             {
+                _itemRepository.Update(item.Model);
+                _itemRepository.Save();
                 RequestDeactivate?.Invoke(this, EventArgs.Empty);
             }
             else
             {
                 _dialogService.ShowError($"'{item.Name}' の起動に失敗しました。");
+            }
+        }
+
+        [RelayCommand]
+        private void ToggleFavorite(LauncherItemViewModel? item)
+        {
+            if (item == null) return;
+
+            item.Model.IsFavorite = !item.Model.IsFavorite;
+            _itemRepository.Update(item.Model);
+            _itemRepository.Save();
+
+            OnPropertyChanged(nameof(DisplayedItems));
+            ShowToast(item.Model.IsFavorite ? $"'{item.Name}' をお気に入りに追加しました" : $"'{item.Name}' をお気に入りから外しました");
+        }
+
+        [RelayCommand]
+        private void LaunchAllInCategory()
+        {
+            if (SelectedCategory == null || !SelectedCategory.Items.Any()) return;
+
+            if (!_dialogService.ShowConfirmDialog($"カテゴリ '{SelectedCategory.Name}' のアイテムをすべて起動しますか？"))
+            {
+                return;
+            }
+
+            var count = 0;
+            foreach (var itemVm in SelectedCategory.Items)
+            {
+                if (_launcherService.Launch(itemVm.Model))
+                {
+                    _itemRepository.Update(itemVm.Model);
+                    count++;
+                }
+            }
+
+            if (count > 0)
+            {
+                _itemRepository.Save();
+                ShowToast($"{count} 個のアイテムを起動しました");
             }
         }
 
@@ -441,16 +491,19 @@ namespace DesktopLauncher.ViewModels
                 return;
             }
 
-            var url = _dialogService.ShowInputDialog("URLを入力してください", "URL追加", "https://");
-            if (string.IsNullOrWhiteSpace(url)) return;
-
-            // URLの簡易バリデーション
-            if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+            var input = _dialogService.ShowInputDialog("URLを入力してください", "URL追加", "https://");
+            if (string.IsNullOrWhiteSpace(input))
             {
-                url = "https://" + url;
+                return;
             }
 
-            AddItemFromPath(url);
+            if (!UrlHelper.TryNormalizeHttpUrl(input, out var normalizedUrl))
+            {
+                _dialogService.ShowError("有効なURLを入力してください。");
+                return;
+            }
+
+            AddItemFromPath(normalizedUrl);
         }
 
         public void AddItemFromPath(string path)

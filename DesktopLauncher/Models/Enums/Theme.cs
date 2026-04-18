@@ -73,6 +73,11 @@ namespace DesktopLauncher.Models.Enums
         /// <summary>
         /// ドリーミー（夢かわいい）
         /// </summary>
-        Dreamy
+        Dreamy,
+
+        /// <summary>
+        /// カスタム（ユーザー定義カラー）
+        /// </summary>
+        Custom
     }
 }

@@ -7,6 +7,7 @@ using DesktopLauncher.Interfaces.Services;
 using DesktopLauncher.Views;
 using System.Windows.Forms;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 
 namespace DesktopLauncher.Services
 {
@@ -88,7 +89,11 @@ namespace DesktopLauncher.Services
                     }
                     else if (File.Exists(initialDirectory))
                     {
-                        dialog.InitialDirectory = Path.GetDirectoryName(initialDirectory);
+                        var dir = Path.GetDirectoryName(initialDirectory);
+                        if (dir != null)
+                        {
+                            dialog.InitialDirectory = dir;
+                        }
                     }
                 }
 
@@ -109,7 +114,7 @@ namespace DesktopLauncher.Services
                     }
 
                     // 「フォルダを選択」などのダミーファイル名の場合、親ディレクトリを返す
-                    return Path.GetDirectoryName(path);
+                    return Path.GetDirectoryName(path) ?? null;
                 }
                 return null;
             });
@@ -186,6 +191,36 @@ namespace DesktopLauncher.Services
                 };
 
                 return dialog.ShowDialog() == true ? dialog.InputText : null;
+            });
+        }
+
+        public string? ShowOpenFileDialog(string title, string filter)
+        {
+            return ShowDialogWithTopmost(() =>
+            {
+                var dialog = new OpenFileDialog
+                {
+                    Title = title,
+                    Filter = filter,
+                    CheckFileExists = true
+                };
+
+                return dialog.ShowDialog(MainWindow) == true ? dialog.FileName : null;
+            });
+        }
+
+        public string? ShowSaveFileDialog(string title, string filter, string defaultFileName = "")
+        {
+            return ShowDialogWithTopmost(() =>
+            {
+                var dialog = new SaveFileDialog
+                {
+                    Title = title,
+                    Filter = filter,
+                    FileName = defaultFileName
+                };
+
+                return dialog.ShowDialog(MainWindow) == true ? dialog.FileName : null;
             });
         }
     }

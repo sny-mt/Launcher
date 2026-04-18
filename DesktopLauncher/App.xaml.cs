@@ -55,8 +55,15 @@ namespace DesktopLauncher
             // 保存されているテーマを適用
             var settingsRepository = ServiceLocator.GetService<Interfaces.Repositories.ISettingsRepository>();
             var settings = settingsRepository.Get();
-            ApplyTheme(settings.Theme);
-            ApplyThemeColor(settings.ThemeColor);
+            if (settings.Theme == Models.Enums.Theme.Custom)
+            {
+                _themeService.ApplyCustomTheme(settings.CustomBaseColor, settings.CustomTextColor, settings.CustomAccentColor);
+            }
+            else
+            {
+                ApplyTheme(settings.Theme);
+                ApplyThemeColor(settings.ThemeColor);
+            }
             ApplyWindowOpacity(settings.WindowOpacity);
         }
 

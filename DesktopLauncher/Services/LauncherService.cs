@@ -48,7 +48,11 @@ namespace DesktopLauncher.Services
                     startInfo.Verb = "runas";
                 }
 
-                Process.Start(startInfo);
+                Process.Start(startInfo)?.Dispose();
+
+                item.LaunchCount++;
+                item.LastLaunchedAt = DateTime.Now;
+
                 return true;
             }
             catch (Exception)
@@ -91,11 +95,11 @@ namespace DesktopLauncher.Services
                 // フォルダを開いてファイルを選択状態にする
                 if (item.ItemType != ItemType.Folder && File.Exists(item.Path))
                 {
-                    Process.Start("explorer.exe", $"/select,\"{item.Path}\"");
+                    Process.Start("explorer.exe", $"/select,\"{item.Path}\"")?.Dispose();
                 }
                 else
                 {
-                    Process.Start("explorer.exe", folderPath);
+                    Process.Start("explorer.exe", folderPath)?.Dispose();
                 }
 
                 return true;

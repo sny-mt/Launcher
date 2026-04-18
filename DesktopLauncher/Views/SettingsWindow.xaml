@@ -93,6 +93,7 @@
                     <ListBoxItem Content="表示"/>
                     <ListBoxItem Content="ホットキー"/>
                     <ListBoxItem Content="動作"/>
+                    <ListBoxItem Content="データ"/>
                 </ListBox>
 
                 <!-- 区切り線 -->
@@ -323,15 +324,145 @@
                                         </ControlTemplate>
                                     </RadioButton.Template>
                                 </RadioButton>
+                                <!-- Custom -->
+                                <RadioButton GroupName="Theme" IsChecked="{Binding Theme, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Custom}" Margin="0,0,6,6">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border" Width="58" Height="32" CornerRadius="4" Cursor="Hand" BorderThickness="2" BorderBrush="{DynamicResource BorderBrush}">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#FF6B6B" Offset="0"/>
+                                                        <GradientStop Color="#4ECDC4" Offset="0.5"/>
+                                                        <GradientStop Color="#45B7D1" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <TextBlock Text="Custom" Foreground="White" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock.Effect><DropShadowEffect ShadowDepth="1" BlurRadius="2" Color="Black" Opacity="0.5"/></TextBlock.Effect>
+                                                </TextBlock>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
                             </WrapPanel>
+
+                            <!-- カスタムカラー設定 -->
+                            <StackPanel Visibility="{Binding IsCustomTheme, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Margin="0,0,0,20">
+                                <TextBlock Text="カスタムカラー"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,12"/>
+
+                                <TextBlock Text="色を変更するとリアルタイムでプレビューされます。"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,12"/>
+
+                                <!-- ベースカラー -->
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="背景色" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Width="32" Height="32" CornerRadius="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,8,0" Cursor="Hand"
+                                            MouseLeftButtonDown="PickBaseColor_Click">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding CustomBaseColor}"/>
+                                        </Border.Background>
+                                    </Border>
+                                    <TextBox Grid.Column="2" Text="{Binding CustomBaseColor, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource SearchTextBoxStyle}" MaxLength="7" Width="80" Margin="0,0,4,0"/>
+                                    <Button Grid.Column="3" Content="🎨" Click="PickBaseColor_Click" ToolTip="カラーパレット"
+                                            Style="{StaticResource IconButtonStyle}" Width="28" Height="28" FontSize="14" Margin="0,0,2,0"/>
+                                    <Button Grid.Column="4" Content="💧" Click="EyedropBaseColor_Click" ToolTip="スポイト（画面の色を取得）"
+                                            Style="{StaticResource IconButtonStyle}" Width="28" Height="28" FontSize="14"/>
+                                </Grid>
+
+                                <!-- テキストカラー -->
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="文字色" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Width="32" Height="32" CornerRadius="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,8,0" Cursor="Hand"
+                                            MouseLeftButtonDown="PickTextColor_Click">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding CustomTextColor}"/>
+                                        </Border.Background>
+                                    </Border>
+                                    <TextBox Grid.Column="2" Text="{Binding CustomTextColor, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource SearchTextBoxStyle}" MaxLength="7" Width="80" Margin="0,0,4,0"/>
+                                    <Button Grid.Column="3" Content="🎨" Click="PickTextColor_Click" ToolTip="カラーパレット"
+                                            Style="{StaticResource IconButtonStyle}" Width="28" Height="28" FontSize="14" Margin="0,0,2,0"/>
+                                    <Button Grid.Column="4" Content="💧" Click="EyedropTextColor_Click" ToolTip="スポイト（画面の色を取得）"
+                                            Style="{StaticResource IconButtonStyle}" Width="28" Height="28" FontSize="14"/>
+                                </Grid>
+
+                                <!-- アクセントカラー -->
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="アクセント色" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Width="32" Height="32" CornerRadius="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,8,0" Cursor="Hand"
+                                            MouseLeftButtonDown="PickAccentColor_Click">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding CustomAccentColor}"/>
+                                        </Border.Background>
+                                    </Border>
+                                    <TextBox Grid.Column="2" Text="{Binding CustomAccentColor, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource SearchTextBoxStyle}" MaxLength="7" Width="80" Margin="0,0,4,0"/>
+                                    <Button Grid.Column="3" Content="🎨" Click="PickAccentColor_Click" ToolTip="カラーパレット"
+                                            Style="{StaticResource IconButtonStyle}" Width="28" Height="28" FontSize="14" Margin="0,0,2,0"/>
+                                    <Button Grid.Column="4" Content="💧" Click="EyedropAccentColor_Click" ToolTip="スポイト（画面の色を取得）"
+                                            Style="{StaticResource IconButtonStyle}" Width="28" Height="28" FontSize="14"/>
+                                </Grid>
+                            </StackPanel>
 
                             <TextBlock Text="テーマカラー"
                                        Foreground="{DynamicResource TextBrush}"
                                        FontSize="14"
                                        FontWeight="SemiBold"
-                                       Margin="0,0,0,12"/>
+                                       Margin="0,0,0,12">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCustomTheme}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
 
                             <WrapPanel Margin="0,0,0,20">
+                                <WrapPanel.Style>
+                                    <Style TargetType="WrapPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCustomTheme}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </WrapPanel.Style>
                                 <RadioButton GroupName="ThemeColor" IsChecked="{Binding ThemeColor, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Blue}" Margin="0,0,6,6">
                                     <RadioButton.Template>
                                         <ControlTemplate TargetType="RadioButton">
@@ -706,6 +837,42 @@
                             <CheckBox Content="アイテム起動後にウィンドウを隠す"
                                       Foreground="{DynamicResource TextBrush}"
                                       IsChecked="{Binding HideAfterLaunch}"/>
+                        </StackPanel>
+
+                        <!-- データ設定 -->
+                        <StackPanel Visibility="{Binding SelectedSettingsCategory, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=データ}">
+                            <TextBlock Text="データ管理"
+                                       Foreground="{DynamicResource TextBrush}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,12"/>
+
+                            <TextBlock Text="登録済みアイテムやカテゴリ、設定をファイルに書き出したり、読み込んだりできます。"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,0,16"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Button Content="エクスポート"
+                                        Command="{Binding ExportDataCommand}"
+                                        Padding="20,10"
+                                        Margin="0,0,8,0"
+                                        Background="{DynamicResource AccentBrush}"
+                                        Foreground="White"
+                                        BorderThickness="0"/>
+                                <Button Content="インポート"
+                                        Command="{Binding ImportDataCommand}"
+                                        Padding="20,10"
+                                        Background="{DynamicResource TertiaryBrush}"
+                                        Foreground="{DynamicResource TextBrush}"
+                                        BorderThickness="0"/>
+                            </StackPanel>
+
+                            <TextBlock Text="{Binding ExportImportMessage}"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>

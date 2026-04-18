@@ -31,5 +31,10 @@ namespace DesktopLauncher.Interfaces.Services
         /// <param name="theme">判定するテーマ</param>
         /// <returns>ライトベースの場合はtrue</returns>
         bool IsLightBasedTheme(Theme theme);
+
+        /// <summary>
+        /// カスタムテーマを適用する
+        /// </summary>
+        void ApplyCustomTheme(string baseColorHex, string textColorHex, string accentColorHex);
     }
 }

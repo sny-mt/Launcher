@@ -67,5 +67,20 @@ namespace DesktopLauncher.Models
         /// アイテム起動後にウィンドウを隠す
         /// </summary>
         public bool HideAfterLaunch { get; set; } = true;
+
+        /// <summary>
+        /// カスタムテーマ - ベースカラー（背景色）HEX形式
+        /// </summary>
+        public string CustomBaseColor { get; set; } = "#1E1E1E";
+
+        /// <summary>
+        /// カスタムテーマ - テキストカラー HEX形式
+        /// </summary>
+        public string CustomTextColor { get; set; } = "#FFFFFF";
+
+        /// <summary>
+        /// カスタムテーマ - アクセントカラー HEX形式
+        /// </summary>
+        public string CustomAccentColor { get; set; } = "#0078D4";
     }
 }

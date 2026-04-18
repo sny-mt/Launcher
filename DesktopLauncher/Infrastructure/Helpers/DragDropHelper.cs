@@ -12,6 +12,9 @@ namespace DesktopLauncher.Infrastructure.Helpers
     /// </summary>
     public class DragDropHelper
     {
+        private const string LauncherItemFormat = "LauncherItem";
+        private const string CategoryFormat = "Category";
+
         private Point _dragStartPoint;
         private LauncherItemViewModel? _draggedItem;
         private CategoryViewModel? _draggedCategory;
@@ -53,21 +56,21 @@ namespace DesktopLauncher.Infrastructure.Helpers
         public bool HandleTileMouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed || _draggedItem == null)
-                return false;
-
-            var currentPos = e.GetPosition(null);
-            var diff = _dragStartPoint - currentPos;
-
-            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
-                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
             {
-                if (sender is Button button)
-                {
-                    var data = new DataObject("LauncherItem", _draggedItem);
-                    DragDrop.DoDragDrop(button, data, DragDropEffects.Move);
-                    _draggedItem = null;
-                    return true;
-                }
+                return false;
+            }
+
+            if (!HasExceededDragThreshold(e.GetPosition(null)))
+            {
+                return false;
+            }
+
+            if (sender is Button button)
+            {
+                var data = new DataObject(LauncherItemFormat, _draggedItem);
+                DragDrop.DoDragDrop(button, data, DragDropEffects.Move);
+                _draggedItem = null;
+                return true;
             }
 
             return false;
@@ -101,21 +104,21 @@ namespace DesktopLauncher.Infrastructure.Helpers
         public bool HandleTabMouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed || _draggedCategory == null)
-                return false;
-
-            var currentPos = e.GetPosition(null);
-            var diff = _dragStartPoint - currentPos;
-
-            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
-                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
             {
-                if (sender is TabItem tabItem)
-                {
-                    var data = new DataObject("Category", _draggedCategory);
-                    DragDrop.DoDragDrop(tabItem, data, DragDropEffects.Move);
-                    _draggedCategory = null;
-                    return true;
-                }
+                return false;
+            }
+
+            if (!HasExceededDragThreshold(e.GetPosition(null)))
+            {
+                return false;
+            }
+
+            if (sender is TabItem tabItem)
+            {
+                var data = new DataObject(CategoryFormat, _draggedCategory);
+                DragDrop.DoDragDrop(tabItem, data, DragDropEffects.Move);
+                _draggedCategory = null;
+                return true;
             }
 
             return false;
@@ -165,33 +168,20 @@ namespace DesktopLauncher.Infrastructure.Helpers
         /// </summary>
         public static DragDropEffects GetDragEffects(DragEventArgs e, Func<string, bool> isUrlChecker)
         {
-            // 内部アイテム移動
-            if (e.Data.GetDataPresent("LauncherItem"))
+            if (e.Data.GetDataPresent(LauncherItemFormat) || e.Data.GetDataPresent(CategoryFormat))
             {
                 return DragDropEffects.Move;
             }
 
-            // カテゴリ移動
-            if (e.Data.GetDataPresent("Category"))
-            {
-                return DragDropEffects.Move;
-            }
-
-            // 外部ファイルドロップ
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 return DragDropEffects.Copy;
             }
 
-            // URLドロップ
-            if (e.Data.GetDataPresent(DataFormats.Text) || e.Data.GetDataPresent(DataFormats.UnicodeText))
+            var text = GetDroppedText(e);
+            if (!string.IsNullOrEmpty(text) && isUrlChecker(text))
             {
-                var text = e.Data.GetData(DataFormats.UnicodeText) as string
-                        ?? e.Data.GetData(DataFormats.Text) as string;
-                if (!string.IsNullOrEmpty(text) && isUrlChecker(text!))
-                {
-                    return DragDropEffects.Copy;
-                }
+                return DragDropEffects.Copy;
             }
 
             return DragDropEffects.None;
@@ -230,9 +220,9 @@ namespace DesktopLauncher.Infrastructure.Helpers
         /// </summary>
         public static LauncherItemViewModel? GetDroppedItem(DragEventArgs e)
         {
-            if (e.Data.GetDataPresent("LauncherItem"))
+            if (e.Data.GetDataPresent(LauncherItemFormat))
             {
-                return e.Data.GetData("LauncherItem") as LauncherItemViewModel;
+                return e.Data.GetData(LauncherItemFormat) as LauncherItemViewModel;
             }
             return null;
         }
@@ -242,11 +232,18 @@ namespace DesktopLauncher.Infrastructure.Helpers
         /// </summary>
         public static CategoryViewModel? GetDroppedCategory(DragEventArgs e)
         {
-            if (e.Data.GetDataPresent("Category"))
+            if (e.Data.GetDataPresent(CategoryFormat))
             {
-                return e.Data.GetData("Category") as CategoryViewModel;
+                return e.Data.GetData(CategoryFormat) as CategoryViewModel;
             }
             return null;
+        }
+
+        private bool HasExceededDragThreshold(Point currentPos)
+        {
+            var diff = _dragStartPoint - currentPos;
+            return Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                   Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance;
         }
     }
 }

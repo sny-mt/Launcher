@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DesktopLauncher.ViewModels.Base;
 
 namespace DesktopLauncher.ViewModels
 {
@@ -18,8 +19,10 @@ namespace DesktopLauncher.ViewModels
     /// <summary>
     /// トースト通知のViewModel
     /// </summary>
-    public partial class ToastViewModel : ObservableObject
+    public partial class ToastViewModel : ViewModelBase
     {
+        private const int CloseAnimationDurationMs = 300;
+
         [ObservableProperty]
         private string _message = string.Empty;
 
@@ -45,28 +48,37 @@ namespace DesktopLauncher.ViewModels
             {
                 Interval = TimeSpan.FromMilliseconds(durationMs)
             };
-            _timer.Tick += (s, e) =>
-            {
-                _timer.Stop();
-                Close();
-            };
+            _timer.Tick += OnAutoCloseTimerTick;
             _timer.Start();
+        }
+
+        private void OnAutoCloseTimerTick(object? sender, EventArgs e)
+        {
+            _timer.Stop();
+            _timer.Tick -= OnAutoCloseTimerTick;
+            Close();
         }
 
         public void Close()
         {
+            if (IsClosing) return;
+
             IsClosing = true;
             // アニメーション完了後にCloseRequestedを発火
             var closeTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(300)
+                Interval = TimeSpan.FromMilliseconds(CloseAnimationDurationMs)
             };
-            closeTimer.Tick += (s, e) =>
+
+            void OnCloseAnimationTick(object? s, EventArgs args)
             {
                 closeTimer.Stop();
+                closeTimer.Tick -= OnCloseAnimationTick;
                 IsVisible = false;
                 CloseRequested?.Invoke(this, EventArgs.Empty);
-            };
+            }
+
+            closeTimer.Tick += OnCloseAnimationTick;
             closeTimer.Start();
         }
 

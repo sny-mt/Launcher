@@ -33,4 +33,14 @@
     <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}"/>
     <SolidColorBrush x:Key="SelectedBrush" Color="{StaticResource SelectedColor}"/>
 
+    <!-- ステータスカラー -->
+    <Color x:Key="SuccessColor">#FF4CAF50</Color>
+    <Color x:Key="ErrorColor">#FFE85959</Color>
+    <Color x:Key="WarningColor">#FFFFC107</Color>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="ToastForegroundBrush" Color="White"/>
+    <SolidColorBrush x:Key="ShadowBrush" Color="Black"/>
+
 </ResourceDictionary>

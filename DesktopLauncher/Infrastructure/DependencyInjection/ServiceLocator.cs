@@ -41,6 +41,9 @@ namespace DesktopLauncher.Infrastructure.DependencyInjection
 
             // 基盤サービス（シングルトン）
             services.AddSingleton<IHotkeyService, HotkeyService>();
+            services.AddSingleton<IPathIconService, PathIconService>();
+            services.AddSingleton<IImageCodecService, ImageCodecService>();
+            services.AddSingleton<IFaviconService, FaviconService>();
             services.AddSingleton<IIconService, IconService>();
             services.AddSingleton<ILauncherService, LauncherService>();
             services.AddSingleton<ISearchService, SearchService>();
@@ -53,6 +56,7 @@ namespace DesktopLauncher.Infrastructure.DependencyInjection
             services.AddSingleton<IStartupService, StartupService>();
             services.AddSingleton<IItemOperationsService, ItemOperationsService>();
             services.AddSingleton<ICategoryOperationsService, CategoryOperationsService>();
+            services.AddSingleton<IDataExportService, DataExportService>();
 
             // ViewModels
             services.AddTransient<MainViewModel>();
