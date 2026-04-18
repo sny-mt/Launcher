@@ -1,8 +1,8 @@
-<Window x:Class="DesktopLauncher.Views.ConfirmDialog"
+<Window x:Class="DesktopLauncher.Views.Dialogs.MessageDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="確認"
-        Width="380" Height="180"
+        Title="メッセージ"
+        Width="380" Height="170"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -29,7 +29,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock x:Name="TitleText"
-                           Text="確認"
+                           Text="メッセージ"
                            Foreground="{DynamicResource TextBrush}"
                            FontSize="14"
                            FontWeight="SemiBold"
@@ -50,16 +50,19 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="?"
-                           FontSize="32"
+                <TextBlock x:Name="IconText"
+                           Text="i"
+                           FontSize="28"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AccentBrush}"
                            VerticalAlignment="Center"
-                           Margin="0,0,16,0"/>
+                           HorizontalAlignment="Center"
+                           Width="36"
+                           Margin="0,0,12,0"/>
 
                 <TextBlock x:Name="MessageText"
                            Grid.Column="1"
-                           Text="確認メッセージ"
+                           Text="メッセージ"
                            Foreground="{DynamicResource TextBrush}"
                            FontSize="13"
                            TextWrapping="Wrap"
@@ -71,17 +74,10 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Margin="16">
-                <Button Content="いいえ"
-                        Click="NoButton_Click"
-                        Padding="24,8"
-                        Margin="0,0,8,0"
-                        Background="{DynamicResource TertiaryBrush}"
-                        Foreground="{DynamicResource TextBrush}"
-                        BorderThickness="0"/>
-                <Button x:Name="YesButton"
-                        Content="はい"
-                        Click="YesButton_Click"
-                        Padding="24,8"
+                <Button x:Name="OkButton"
+                        Content="OK"
+                        Click="OkButton_Click"
+                        Padding="32,8"
                         Background="{DynamicResource AccentBrush}"
                         Foreground="White"
                         BorderThickness="0"/>

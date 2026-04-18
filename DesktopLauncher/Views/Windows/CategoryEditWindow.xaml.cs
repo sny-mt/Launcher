@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using DesktopLauncher.Models;
 
-namespace DesktopLauncher.Views
+namespace DesktopLauncher.Views.Windows
 {
     /// <summary>
     /// CategoryEditWindow.xaml の相互作用ロジック

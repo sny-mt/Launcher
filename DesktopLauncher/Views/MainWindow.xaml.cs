@@ -15,7 +15,7 @@ using DesktopLauncher.Interfaces.Services.Search;
 using DesktopLauncher.Models;
 using DesktopLauncher.ViewModels;
 
-namespace DesktopLauncher
+namespace DesktopLauncher.Views
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック

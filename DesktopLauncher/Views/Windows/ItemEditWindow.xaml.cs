@@ -10,7 +10,7 @@ using DesktopLauncher.Interfaces.Services.Search;
 using DesktopLauncher.Models;
 using DesktopLauncher.ViewModels;
 
-namespace DesktopLauncher.Views
+namespace DesktopLauncher.Views.Windows
 {
     /// <summary>
     /// ItemEditWindow.xaml の相互作用ロジック

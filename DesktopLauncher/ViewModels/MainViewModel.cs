@@ -614,7 +614,7 @@ namespace DesktopLauncher.ViewModels
         [RelayCommand]
         private void AddCategory()
         {
-            var editWindow = new Views.CategoryEditWindow();
+            var editWindow = new Views.Windows.CategoryEditWindow();
             editWindow.Owner = Application.Current.MainWindow;
 
             if (editWindow.ShowDialog() == true && editWindow.ResultCategory != null)
@@ -635,7 +635,7 @@ namespace DesktopLauncher.ViewModels
         {
             if (categoryVm == null) return;
 
-            var editWindow = new Views.CategoryEditWindow(categoryVm.Model);
+            var editWindow = new Views.Windows.CategoryEditWindow(categoryVm.Model);
             editWindow.Owner = Application.Current.MainWindow;
 
             if (editWindow.ShowDialog() == true && editWindow.ResultCategory != null)
@@ -673,7 +673,7 @@ namespace DesktopLauncher.ViewModels
         [RelayCommand]
         private void ShowSettings()
         {
-            var settingsWindow = new Views.SettingsWindow();
+            var settingsWindow = new Views.Windows.SettingsWindow();
             settingsWindow.Owner = Application.Current.MainWindow;
 
             if (settingsWindow.ShowDialog() == true && settingsWindow.ResultSettings != null)
@@ -690,7 +690,7 @@ namespace DesktopLauncher.ViewModels
         {
             if (item == null || SelectedCategory == null) return;
 
-            var editWindow = new Views.ItemEditWindow(item.Model);
+            var editWindow = new Views.Windows.ItemEditWindow(item.Model);
             editWindow.Owner = Application.Current.MainWindow;
 
             if (editWindow.ShowDialog() == true && editWindow.ResultItem != null)

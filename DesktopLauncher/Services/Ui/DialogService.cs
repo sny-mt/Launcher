@@ -9,7 +9,7 @@ using DesktopLauncher.Interfaces.Services.Operations;
 using DesktopLauncher.Interfaces.Services.Ui;
 using DesktopLauncher.Interfaces.Services.Shell;
 using DesktopLauncher.Interfaces.Services.Search;
-using DesktopLauncher.Views;
+using DesktopLauncher.Views.Dialogs;
 using System.Windows.Forms;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using SaveFileDialog = Microsoft.Win32.SaveFileDialog;

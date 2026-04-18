@@ -1,22 +1,29 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace DesktopLauncher.Views
+namespace DesktopLauncher.Views.Dialogs
 {
     /// <summary>
-    /// 確認ダイアログ
+    /// 汎用テキスト入力ダイアログ
     /// </summary>
-    public partial class ConfirmDialog : Window
+    public partial class InputDialog : Window
     {
-        public ConfirmDialog(string message, string title = "確認")
+        public string InputText => InputTextBox.Text;
+
+        public InputDialog(string prompt, string title = "入力", string defaultValue = "")
         {
             InitializeComponent();
 
             TitleText.Text = title;
             Title = title;
-            MessageText.Text = message;
+            PromptText.Text = prompt;
+            InputTextBox.Text = defaultValue;
 
-            Loaded += (s, e) => YesButton.Focus();
+            Loaded += (s, e) =>
+            {
+                InputTextBox.Focus();
+                InputTextBox.SelectAll();
+            };
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -27,13 +34,13 @@ namespace DesktopLauncher.Views
             }
         }
 
-        private void YesButton_Click(object sender, RoutedEventArgs e)
+        private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
             Close();
         }
 
-        private void NoButton_Click(object sender, RoutedEventArgs e)
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
             Close();
@@ -52,7 +59,11 @@ namespace DesktopLauncher.Views
                 DialogResult = false;
                 Close();
             }
-            else if (e.Key == Key.Enter)
+        }
+
+        private void InputTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
             {
                 DialogResult = true;
                 Close();

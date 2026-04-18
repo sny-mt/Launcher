@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace DesktopLauncher.Views
+namespace DesktopLauncher.Views.Dialogs
 {
     /// <summary>
     /// メッセージダイアログの種類
